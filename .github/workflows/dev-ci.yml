@@ -37,7 +37,7 @@ jobs:
       - name: Build
         run: |
           chmod +x gradlew
-          ./gradlew test
+          ./gradlew build
         shell: bash
 
       - name: Publish Test Results
