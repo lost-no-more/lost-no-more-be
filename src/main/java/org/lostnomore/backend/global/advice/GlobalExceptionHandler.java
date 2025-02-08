@@ -1,0 +1,48 @@
+package org.lostnomore.backend.global.advice;
+
+import lombok.extern.slf4j.Slf4j;
+import org.lostnomore.backend.global.exception.BusinessException;
+import org.lostnomore.backend.global.exception.code.BusinessErrorCode;
+import org.lostnomore.backend.global.dto.ResponseDto;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Objects;
+
+@Slf4j
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(value = {BusinessException.class})
+    public ResponseEntity<ResponseDto<BusinessErrorCode>> handleBusinessException(BusinessException e) {
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                .body(ResponseDto.fail(e.getErrorCode()));
+    }
+
+    @ExceptionHandler(value = {MethodArgumentNotValidException.class})
+    public ResponseEntity<ResponseDto<BusinessErrorCode>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ResponseDto.validFail(Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage()));
+    }
+
+    @ExceptionHandler(value = {MissingRequestHeaderException.class})
+    public ResponseEntity<ResponseDto<BusinessErrorCode>> handleMissingHeaderException(MissingRequestHeaderException e) {
+        return ResponseEntity
+                .status(BusinessErrorCode.MISSING_REQUIRED_HEADER.getHttpStatus())
+                .body(ResponseDto.fail(BusinessErrorCode.MISSING_REQUIRED_HEADER));
+    }
+
+    @ExceptionHandler(value = {Exception.class})
+    public ResponseEntity<ResponseDto<BusinessErrorCode>> handleException(java.lang.Exception e) {
+        log.error("Unhandled exception occurred: {}", e.getMessage(), e);
+        return ResponseEntity
+                .status(BusinessErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus())
+                .body(ResponseDto.fail(BusinessErrorCode.INTERNAL_SERVER_ERROR));
+    }
+}
