@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+	id 'jacoco' // 테스트 커버리지 검증 라이브러리 추가
 	id 'org.springframework.boot' version '3.4.2'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -11,6 +12,10 @@ java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
 	}
+}
+
+jacoco {
+	toolVersion = '0.8.12'
 }
 
 repositories {
@@ -32,6 +37,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+	runtimeOnly 'com.h2database:h2'
 
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -46,4 +52,13 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required.set(true)
+	}
 }
