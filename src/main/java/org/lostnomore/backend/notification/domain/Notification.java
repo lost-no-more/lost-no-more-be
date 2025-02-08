@@ -34,7 +34,7 @@ public class Notification extends BaseEntity {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @Column(name = "date", nullable = false)
+    @Column(name = "keyword", nullable = false)
     private String keyword;
 
     @Column(name = "ids", nullable = false)
