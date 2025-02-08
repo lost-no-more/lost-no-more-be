@@ -23,14 +23,13 @@ jobs:
       - name: Create application-dev.yml
         run: |
           mkdir -p ./src/main/resources
-          echo "${{ secrets.APPLICATION_DEV }}" > ./src/main/resources/application-dev.yml
-          cat ./src/main/resources/application-dev.yml
+          echo "${{ secrets.APPLICATION_DEV }}" | base64 --decode > ./src/main/resources/application-dev.yml
         shell: bash
 
       - name: Build Project
         run: |
           chmod +x gradlew
-          ./gradlew build -x test
+          ./gradlew bootJar
         shell: bash
 
       - name: Set up Docker Buildx
