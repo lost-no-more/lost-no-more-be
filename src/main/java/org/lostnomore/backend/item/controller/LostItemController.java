@@ -3,6 +3,7 @@ package org.lostnomore.backend.item.controller;
 import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.item.dto.response.ItemsCountDto;
+import org.lostnomore.backend.item.dto.response.RecentItemsDto;
 import org.lostnomore.backend.item.service.LostItemService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,13 @@ public class LostItemController {
     @GetMapping("items/count")
     public ResponseEntity<ResponseDto<ItemsCountDto>> getItemsCount () {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(lostItemService.getItemsCount()));
+    }
+
+    @GetMapping("items/recent")
+    public ResponseEntity<ResponseDto<RecentItemsDto>> getRecentItems (
+            final Long userId
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(lostItemService.getRecentItems(userId)));
     }
 
 }
