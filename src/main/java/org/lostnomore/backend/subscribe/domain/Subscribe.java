@@ -9,7 +9,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.lostnomore.backend.global.domain.BaseEntity;
 import org.lostnomore.backend.item.domain.Category;
 import org.lostnomore.backend.user.domain.User;
@@ -17,6 +20,7 @@ import org.lostnomore.backend.user.domain.User;
 @Getter
 @Table(name = "subscribe")
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Subscribe extends BaseEntity {
 
     @Id
@@ -34,4 +38,11 @@ public class Subscribe extends BaseEntity {
 
     @Column(name = "keyword", nullable = false)
     private String keyword;
+
+    @Builder
+    public Subscribe(User user, Category category, String keyword) {
+        this.user = user;
+        this.category = category;
+        this.keyword = keyword;
+    }
 }

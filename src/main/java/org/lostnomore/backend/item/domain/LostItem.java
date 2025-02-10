@@ -10,11 +10,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Table(name = "lost_item")
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LostItem {
 
     @Id
@@ -41,4 +45,14 @@ public class LostItem {
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
+
+    @Builder
+    public LostItem(Location location, Category category, String color, String image, String name, LocalDate date) {
+        this.location = location;
+        this.category = category;
+        this.color = color;
+        this.image = image;
+        this.name = name;
+        this.date = date;
+    }
 }
