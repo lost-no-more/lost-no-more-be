@@ -8,11 +8,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Table(name = "user")
+@Table(name = "usesr")
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
     @Id
@@ -29,4 +33,11 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     @Column(name = "social_type", nullable = false)
     private SocialType socialType;
+
+    @Builder
+    public User(String email, String name, SocialType socialType) {
+        this.email = email;
+        this.name = name;
+        this.socialType = socialType;
+    }
 }
