@@ -1,6 +1,7 @@
 package org.lostnomore.backend.global.advice;
 
 import lombok.extern.slf4j.Slf4j;
+import org.lostnomore.backend.global.exception.AuthException;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.BusinessErrorCode;
 import org.lostnomore.backend.global.dto.ResponseDto;
@@ -19,6 +20,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = {BusinessException.class})
     public ResponseEntity<ResponseDto<BusinessErrorCode>> handleBusinessException(BusinessException e) {
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                .body(ResponseDto.fail(e.getErrorCode()));
+    }
+
+    @ExceptionHandler(value = {AuthException.class})
+    public ResponseEntity<ResponseDto<AuthException>> handleAuthException(AuthException e) {
         return ResponseEntity
                 .status(e.getErrorCode().getHttpStatus())
                 .body(ResponseDto.fail(e.getErrorCode()));
