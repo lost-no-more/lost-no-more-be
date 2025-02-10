@@ -14,12 +14,13 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.lostnomore.backend.global.domain.BaseEntity;
 
 @Getter
 @Table(name = "lost_item")
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class LostItem {
+public class LostItem extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
