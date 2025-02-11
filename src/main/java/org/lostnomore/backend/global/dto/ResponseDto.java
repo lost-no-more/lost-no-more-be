@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 public record ResponseDto<T> (
         boolean isSuccess,
         T data,
-        ErrorDto errorDto
+        ErrorDto error
 ) {
     // 결과가 없는 성공 응답
     public static <T> ResponseDto<T> success() {
