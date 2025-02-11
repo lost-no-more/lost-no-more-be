@@ -10,13 +10,17 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.lostnomore.backend.global.domain.BaseEntity;
 import org.lostnomore.backend.item.domain.Category;
 
 @Getter
 @Table(name = "notification")
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Notification extends BaseEntity {
 
     @Id
@@ -39,4 +43,13 @@ public class Notification extends BaseEntity {
 
     @Column(name = "ids", nullable = false)
     private String ids;
+
+    @Builder
+    public Notification(Category category, Long totalCount, LocalDate date, String keyword, String ids) {
+        this.category = category;
+        this.totalCount = totalCount;
+        this.date = date;
+        this.keyword = keyword;
+        this.ids = ids;
+    }
 }
