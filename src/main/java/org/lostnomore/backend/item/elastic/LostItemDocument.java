@@ -1,0 +1,46 @@
+package org.lostnomore.backend.item.elastic;
+
+import lombok.Builder;
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.GeoPointField;
+import org.springframework.data.elasticsearch.core.geo.GeoPoint;
+
+import java.time.LocalDate;
+
+@Data
+@Document(indexName = "lost_item")
+public class LostItemDocument {
+
+    @Id
+    private Long id;
+
+    @Field(type = FieldType.Text, analyzer = "standard")
+    private String name;
+
+    @Field(type = FieldType.Date)
+    private LocalDate date;
+
+    @Field(type = FieldType.Long)
+    private Long categoryId;
+
+    @Field(type = FieldType.Text, analyzer = "standard")
+    private String region;
+
+    @GeoPointField
+    private GeoPoint location;
+
+    @Builder
+    public LostItemDocument(Long id, String name, LocalDate date, Long categoryId, String region, Double lat, Double lon) {
+        this.id = id;
+        this.name = name;
+        this.date = date;
+        this.categoryId = categoryId;
+        this.region = region;
+        this.location = new GeoPoint(lat, lon);
+    }
+}
+
