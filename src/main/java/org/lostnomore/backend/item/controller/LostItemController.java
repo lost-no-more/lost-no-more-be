@@ -8,6 +8,9 @@ import org.lostnomore.backend.item.service.LostItemService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.lostnomore.backend.item.dto.request.LostItemCreateDto;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -28,4 +31,11 @@ public class LostItemController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(lostItemService.getRecentItems(userId)));
     }
 
+    @PostMapping("/items")
+    public ResponseEntity<ResponseDto<Void>> saveLostItem(
+            @RequestBody final LostItemCreateDto request
+    ) {
+        lostItemService.saveLostItem(request);
+        return ResponseEntity.ok(ResponseDto.success());
+    }
 }
