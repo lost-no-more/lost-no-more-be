@@ -6,7 +6,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.auth.dto.response.AccessTokenDto;
 import org.lostnomore.backend.auth.dto.response.KakaoUserDto;
-import org.lostnomore.backend.global.exception.AuthException;
+import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.AuthErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -79,9 +79,9 @@ public class KakaoProvider implements OAuthProvider{
 
             return Objects.requireNonNull(response.getBody()).getAccessToken();
         } catch (HttpClientErrorException e) {
-            throw new AuthException(AuthErrorCode.INVALID_CODE);
+            throw new BusinessException(AuthErrorCode.INVALID_CODE);
         } catch (HttpServerErrorException | NullPointerException e) {
-            throw new AuthException(AuthErrorCode.INTERNAL_SERVER_ERROR);
+            throw new BusinessException(AuthErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -101,9 +101,9 @@ public class KakaoProvider implements OAuthProvider{
             );
             return Objects.requireNonNull(response.getBody()).getKakaoAccount().email();
         } catch (HttpClientErrorException e) {
-            throw new AuthException(AuthErrorCode.INVALID_TOKEN);
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
         } catch (HttpServerErrorException | NullPointerException e) {
-            throw new AuthException(AuthErrorCode.INTERNAL_SERVER_ERROR);
+            throw new BusinessException(AuthErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 }

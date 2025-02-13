@@ -1,7 +1,7 @@
 package org.lostnomore.backend.auth.dto;
 
 import java.util.Arrays;
-import org.lostnomore.backend.global.exception.AuthException;
+import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.AuthErrorCode;
 
 public enum OAuthType {
@@ -12,6 +12,6 @@ public enum OAuthType {
         return Arrays.stream(OAuthType.values())
                 .filter(type -> type.name().equals(provider.toUpperCase()))
                 .findFirst()
-                .orElseThrow(() -> new AuthException(AuthErrorCode.NON_EXISTENT_SOCIAL_TYPE));
+                .orElseThrow(() -> new BusinessException(AuthErrorCode.NON_EXISTENT_SOCIAL_TYPE));
     }
 }
