@@ -2,7 +2,9 @@ package org.lostnomore.backend.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.global.dto.ResponseDto;
+import org.lostnomore.backend.item.dto.request.LostItemIdsDto;
 import org.lostnomore.backend.item.dto.response.ItemsCountDto;
+import org.lostnomore.backend.item.dto.response.LostItemsListDto;
 import org.lostnomore.backend.item.dto.response.RecentItemsDto;
 import org.lostnomore.backend.item.dto.request.LostItemCreateDto;
 import org.lostnomore.backend.item.dto.response.LostItemsSearchDto;
@@ -64,5 +66,12 @@ public class LostItemController {
                 category_id,
                 region
         )));
+    }
+
+    @GetMapping("/items/search/list")
+    public ResponseEntity<ResponseDto<LostItemsListDto>> searchLostItemsList(
+            @RequestBody final LostItemIdsDto lostItemIdsDto
+    ) {
+        return ResponseEntity.ok().body(ResponseDto.success(lostItemService.searchLostItemsList(lostItemIdsDto.ids())));
     }
 }
