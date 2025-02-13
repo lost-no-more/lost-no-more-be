@@ -5,8 +5,11 @@ import org.lostnomore.backend.item.domain.Category;
 import org.lostnomore.backend.item.domain.Location;
 import org.lostnomore.backend.item.domain.LostItem;
 import org.lostnomore.backend.item.dto.request.LostItemCreateDto;
+import org.lostnomore.backend.item.dto.response.LostItemsSearchDto;
 import org.lostnomore.backend.item.elastic.LostItemDocument;
 import org.lostnomore.backend.item.elastic.LostItemSearchRepository;
+import org.lostnomore.backend.item.elastic.LostItemSearchService;
+import org.lostnomore.backend.item.manager.*;
 import org.lostnomore.backend.item.repository.CategoryRepository;
 import org.lostnomore.backend.item.repository.LocationRepository;
 import org.lostnomore.backend.item.repository.LostItemRepository;
@@ -27,10 +30,12 @@ import java.util.List;
 public class LostItemService {
 
     private final LostItemRetriever lostItemRetriever;
-    private final LostItemRepository lostItemRepository;
+    private final CategoryRetriever categoryRetriever;
+    private final LocationRetriever locationRetriever;
+    private final LocationCreator locationCreator;
+    private final LostItemCreator lostItemCreator;
     private final LostItemSearchRepository lostItemSearchRepository;
-    private final LocationRepository locationRepository;
-    private final CategoryRepository categoryRepository;
+    private final LostItemSearchService lostItemSearchService;
 
     @Transactional(readOnly = true)
     public ItemsCountDto getItemsCount() {
@@ -54,11 +59,13 @@ public class LostItemService {
     public void saveLostItem(LostItemCreateDto request) {
         Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 Category가 존재하지 않습니다."));
+    public void saveLostItem(final LostItemCreateDto request) {
+        Category category = categoryRetriever.findById(request.categoryId());
 
-        Location location = locationRepository.findByName(request.location());
+        Location location = locationRetriever.findByName(request.location());
 
         if (location == null) {
-            location = locationRepository.save(Location.builder()
+            location = locationCreator.save(Location.builder()
                     .name(request.location())
                     .region("부산")
                     .longitude(129.0756)
@@ -66,7 +73,7 @@ public class LostItemService {
                     .build());
         }
 
-        LostItem savedItem = lostItemRepository.save(LostItem.builder()
+        LostItem savedItem = lostItemCreator.save(LostItem.builder()
                 .name(request.name())
                 .date(request.date())
                 .category(category)
