@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.BusinessErrorCode;
-import org.lostnomore.backend.global.exception.code.CommonErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -43,7 +42,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseDto<String>> handleMissingParameterException(MissingServletRequestParameterException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ResponseDto.fail(CommonErrorCode.MISSING_REQUIRED_PARAMETER));
+                .body(ResponseDto.fail(BusinessErrorCode.MISSING_REQUIRED_PARAMETER));
     }
 
     @ExceptionHandler(value = {Exception.class})
