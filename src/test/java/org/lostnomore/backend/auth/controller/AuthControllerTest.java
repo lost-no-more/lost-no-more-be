@@ -11,7 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.lostnomore.backend.auth.provider.OAuthProvider;
 import org.lostnomore.backend.auth.service.AuthService;
 import org.lostnomore.backend.common.ControllerTest;
-import org.lostnomore.backend.global.exception.AuthException;
+import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.AuthErrorCode;
 import org.lostnomore.backend.global.exception.code.CommonErrorCode;
 import org.mockito.InjectMocks;
@@ -50,7 +50,7 @@ class AuthControllerTest extends ControllerTest {
     void OAuth_소셜_로그인을_위한_링크_api_호출_시_존재하지_않는_provider면_오류() throws Exception {
         // given
         String provider = "nonExistentProvider";
-        given(authService.getCodeLink(provider)).willThrow(new AuthException(AuthErrorCode.NON_EXISTENT_SOCIAL_TYPE));
+        given(authService.getCodeLink(provider)).willThrow(new BusinessException(AuthErrorCode.NON_EXISTENT_SOCIAL_TYPE));
 
         // when & then
         mockMvc.perform(get("/auth/oauth/{provider}/code", provider))
