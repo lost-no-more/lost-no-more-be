@@ -17,7 +17,7 @@ jobs:
           - 9200:9200
         env:
           discovery.type: single-node
-          ES_JAVA_OPTS: "-Xms512m -Xmx768m"
+          ES_JAVA_OPTS: "-Xms1g -Xmx1g"
           xpack.security.enabled: "false"
 
     steps:
@@ -46,6 +46,18 @@ jobs:
 
       - name: Set Environment for CI
         run: echo "ELASTICSEARCH_URI=http://elasticsearch:9200" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Debug Networking
+        run: |
+          echo "===== /etc/hosts ====="
+          cat /etc/hosts
+
+          echo "===== docker ps ====="
+          docker ps
+
+          echo "===== ping elasticsearch (테스트) ====="
+          ping -c 4 elasticsearch || echo "ping 실패"
         shell: bash
 
       - name: Wait for Elasticsearch
