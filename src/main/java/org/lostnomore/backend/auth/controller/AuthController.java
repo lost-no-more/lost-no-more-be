@@ -2,7 +2,7 @@ package org.lostnomore.backend.auth.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.lostnomore.backend.auth.dto.UserTokens;
+import org.lostnomore.backend.auth.dto.UserTokenDto;
 import org.lostnomore.backend.auth.provider.CookieProvider;
 import org.lostnomore.backend.auth.service.AuthService;
 import org.lostnomore.backend.global.dto.ResponseDto;
@@ -34,9 +34,9 @@ public class AuthController {
     @PostMapping("/oauth/{provider}/login")
     public ResponseEntity<ResponseDto> oauth(@PathVariable String provider, @RequestParam String code,
                                              HttpServletResponse response) {
-        UserTokens userTokens = authService.oauthLogin(provider, code);
-        cookieProvider.createCookie(userTokens.getRefreshToken(), response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokens.getAccessToken()));
+        UserTokenDto userTokenDto = authService.oauthLogin(provider, code);
+        cookieProvider.createCookie(userTokenDto.getRefreshToken(), response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokenDto.getAccessToken()));
     }
 
     @PostMapping("/reissue")
@@ -44,8 +44,8 @@ public class AuthController {
                                              @RequestHeader("Authorization") final String authorizationHeader,
                                              HttpServletResponse response) {
 
-        UserTokens userTokens = authService.reissue(refreshToken, authorizationHeader);
-        cookieProvider.createCookie(userTokens.getRefreshToken(), response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokens.getAccessToken()));
+        UserTokenDto userTokenDto = authService.reissue(refreshToken, authorizationHeader);
+        cookieProvider.createCookie(userTokenDto.getRefreshToken(), response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokenDto.getAccessToken()));
     }
 }
