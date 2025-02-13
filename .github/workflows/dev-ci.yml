@@ -45,7 +45,7 @@ jobs:
         shell: bash
 
       - name: Set Environment for CI
-        run: echo "ELASTICSEARCH_URI=http://elasticsearch:9200" >> $GITHUB_ENV
+        run: echo "ELASTICSEARCH_URI=http://localhost:9200" >> $GITHUB_ENV
         shell: bash
 
       - name: Debug Networking
@@ -56,27 +56,35 @@ jobs:
           echo "===== docker ps ====="
           docker ps
 
-          echo "===== ping elasticsearch (테스트) ====="
-          ping -c 4 elasticsearch || echo "ping 실패"
+          echo "===== netstat (열린 포트 확인) ====="
+          netstat -tulnp
+
+          echo "===== ping localhost (테스트) ====="
+          ping -c 4 localhost || echo "ping 실패"
         shell: bash
 
       - name: Wait for Elasticsearch
         run: |
           echo "Waiting for Elasticsearch to be available..."
-          timeout 180s bash -c 'until curl -s http://elasticsearch:9200 > /dev/null; do sleep 5; echo "Still waiting..."; done'
+          timeout 300s bash -c 'until curl -s http://localhost:9200 > /dev/null; do sleep 5; echo "Still waiting..."; done'
           echo "Elasticsearch is up!"
         shell: bash
 
       - name: Check Elasticsearch Health
         run: |
           echo "Checking Elasticsearch cluster health..."
-          curl -X GET "http://elasticsearch:9200/_cluster/health?pretty"
+          curl -v http://localhost:9200/_cluster/health?pretty || echo "Elasticsearch health check failed"
         shell: bash
         if: always()
 
       - name: Debug Elasticsearch Logs (if failed)
         if: failure()
-        run: docker logs $(docker ps -q --filter "ancestor=docker.elastic.co/elasticsearch/elasticsearch:8.17.1")
+        run: |
+          echo "===== Elasticsearch 컨테이너 로그 ====="
+          docker logs $(docker ps -q --filter "ancestor=docker.elastic.co/elasticsearch/elasticsearch:8.17.1")
+
+          echo "===== Elasticsearch 기동 상태 확인 (추가) ====="
+          docker inspect $(docker ps -q --filter "ancestor=docker.elastic.co/elasticsearch/elasticsearch:8.17.1")
         shell: bash
 
       - name: Build
