@@ -10,6 +10,15 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
+    services:
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1
+        ports:
+          - 9200:9200
+        env:
+          discovery.type: single-node
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,6 +41,13 @@ jobs:
         run: |
           mkdir -p ./src/main/resources
           echo "${{ secrets.APPLICATION_DEV }}" | base64 --decode > ./src/main/resources/application-dev.yml
+        shell: bash
+
+      - name: Wait for Elasticsearch
+        run: |
+          curl -o wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh
+          chmod +x wait-for-it.sh
+          ./wait-for-it.sh localhost:9200 --timeout=30 --strict -- echo "Elasticsearch is up"
         shell: bash
 
       - name: Build
