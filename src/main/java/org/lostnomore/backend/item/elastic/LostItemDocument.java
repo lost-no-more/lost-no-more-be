@@ -18,7 +18,7 @@ public class LostItemDocument {
     @Id
     private Long id;
 
-    @Field(type = FieldType.Text, analyzer = "nori")
+    @Field(type = FieldType.Text, analyzer = "standard")
     private String name;
 
     @Field(type = FieldType.Date)
