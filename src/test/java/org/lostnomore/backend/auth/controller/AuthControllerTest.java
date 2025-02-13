@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.lostnomore.backend.auth.provider.OAuthProvider;
 import org.lostnomore.backend.auth.service.AuthService;
 import org.lostnomore.backend.common.ControllerTest;
@@ -16,10 +15,10 @@ import org.lostnomore.backend.global.exception.code.AuthErrorCode;
 import org.lostnomore.backend.global.exception.code.CommonErrorCode;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(AuthController.class)
 class AuthControllerTest extends ControllerTest {
 
     @Mock
