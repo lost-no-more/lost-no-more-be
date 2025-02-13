@@ -18,7 +18,7 @@ public class LostItemDocument {
     @Id
     private Long id;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
+    @Field(type = FieldType.Text, analyzer = "nori")
     private String name;
 
     @Field(type = FieldType.Date)
@@ -33,14 +33,25 @@ public class LostItemDocument {
     @GeoPointField
     private GeoPoint location;
 
+    public LostItemDocument() {
+    }
+
     @Builder
-    public LostItemDocument(Long id, String name, LocalDate date, Long categoryId, String region, Double lat, Double lon) {
+    public LostItemDocument(
+            Long id,
+            String name,
+            LocalDate date,
+            Long categoryId,
+            String region,
+            GeoPoint location
+    ) {
         this.id = id;
         this.name = name;
         this.date = date;
         this.categoryId = categoryId;
         this.region = region;
-        this.location = new GeoPoint(lat, lon);
+        this.location = location;
     }
+
 }
 

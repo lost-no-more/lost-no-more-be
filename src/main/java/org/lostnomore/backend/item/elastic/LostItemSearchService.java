@@ -1,0 +1,119 @@
+package org.lostnomore.backend.item.elastic;
+
+import co.elastic.clients.elasticsearch._types.GeoBounds;
+import co.elastic.clients.elasticsearch._types.GeoLocation;
+import co.elastic.clients.elasticsearch._types.query_dsl.*;
+import co.elastic.clients.json.JsonData;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class LostItemSearchService {
+
+    private final ElasticsearchOperations elasticsearchOperations;
+
+    @Transactional(readOnly = true)
+    public SearchHits<LostItemDocument> searchLostItems(
+            LocalDate dateStart,
+            LocalDate dateEnd,
+            Double topLeftLat,
+            Double topLeftLon,
+            Double bottomRightLat,
+            Double bottomRightLon,
+            String keyword,
+            Integer categoryId,
+            String region
+    ) {
+
+        List<Query> mustQueries = new ArrayList<>();
+        List<Query> shouldQueries = new ArrayList<>();
+
+        // 날짜 범위
+        RangeQuery dateRangeQuery = RangeQuery.of(r -> r
+                .field("date")
+                .gte(JsonData.of(dateStart.toString()))
+                .lte(JsonData.of(dateEnd.toString()))
+        );
+        mustQueries.add(dateRangeQuery._toQuery());
+
+        // 키워드 검색
+        boolean hasKeyword = (keyword != null && !keyword.isBlank());
+
+        if (hasKeyword) {
+            // 유사 검색
+            FuzzyQuery fuzzyQuery = FuzzyQuery.of(f -> f
+                    .field("name")
+                    .value(keyword)
+                    .fuzziness("AUTO")
+            );
+            shouldQueries.add(fuzzyQuery._toQuery());
+
+            // 부분 검색
+            PrefixQuery prefixQuery = PrefixQuery.of(p -> p
+                    .field("name")
+                    .value(keyword)
+            );
+            shouldQueries.add(prefixQuery._toQuery());
+        }
+
+        // 카테고리
+        if (categoryId != null) {
+            TermQuery termQuery = TermQuery.of(t -> t
+                    .field("categoryId")
+                    .value(categoryId)
+            );
+            mustQueries.add(termQuery._toQuery());
+        }
+
+        // 지역
+        if (region != null && !region.isBlank()) {
+            MatchQuery regionQuery = MatchQuery.of(m -> m
+                    .field("region")
+                    .query(region)
+            );
+            mustQueries.add(regionQuery._toQuery());
+        }
+
+        // 위치 필터
+        GeoBoundingBoxQuery geoQuery = GeoBoundingBoxQuery.of(g -> g
+                .field("location")
+                .boundingBox(
+                        GeoBounds.of(outer -> outer.tlbr(b -> b
+                                .topLeft(GeoLocation.of(loc ->
+                                        loc.text(topLeftLat + "," + topLeftLon)
+                                ))
+                                .bottomRight(GeoLocation.of(loc ->
+                                        loc.text(bottomRightLat + "," + bottomRightLon)
+                                ))
+                        ))
+                )
+        );
+        mustQueries.add(geoQuery._toQuery());
+
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder()
+                .must(mustQueries); // 필수 조건 추가
+
+        if (hasKeyword) {
+            boolQueryBuilder.should(shouldQueries);
+            boolQueryBuilder.minimumShouldMatch("1");
+        }
+
+        Query boolQuery = boolQueryBuilder.build()._toQuery();
+
+        NativeQuery searchQuery = NativeQuery.builder()
+                .withQuery(boolQuery)
+                .build();
+
+        return elasticsearchOperations.search(searchQuery, LostItemDocument.class);
+    }
+}

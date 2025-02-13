@@ -10,15 +10,13 @@ import org.lostnomore.backend.item.elastic.LostItemDocument;
 import org.lostnomore.backend.item.elastic.LostItemSearchRepository;
 import org.lostnomore.backend.item.elastic.LostItemSearchService;
 import org.lostnomore.backend.item.manager.*;
-import org.lostnomore.backend.item.repository.CategoryRepository;
-import org.lostnomore.backend.item.repository.LocationRepository;
-import org.lostnomore.backend.item.repository.LostItemRepository;
 import jakarta.persistence.Tuple;
 import org.lostnomore.backend.item.dto.response.ItemsCountDto;
 import org.lostnomore.backend.item.dto.response.RecentItemsDto;
-import org.lostnomore.backend.item.manager.LostItemRetriever;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,9 +54,6 @@ public class LostItemService {
     }
 
     @Transactional
-    public void saveLostItem(LostItemCreateDto request) {
-        Category category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 Category가 존재하지 않습니다."));
     public void saveLostItem(final LostItemCreateDto request) {
         Category category = categoryRetriever.findById(request.categoryId());
 
@@ -88,10 +83,32 @@ public class LostItemService {
                 .date(savedItem.getDate())
                 .categoryId(savedItem.getCategory().getId())
                 .region(savedItem.getLocation().getRegion())
-                .lat(savedItem.getLocation().getLatitude())
-                .lon(savedItem.getLocation().getLongitude())
+                .location(
+                        new GeoPoint(
+                                savedItem.getLocation().getLatitude(),
+                                savedItem.getLocation().getLongitude()
+                        )
+                )
                 .build();
 
         lostItemSearchRepository.save(document);
+    }
+
+    @Transactional(readOnly = true)
+    public LostItemsSearchDto searchLostItems(
+            LocalDate dateStart, LocalDate dateEnd,
+            Double topLeftLat, Double topLeftLon,
+            Double bottomRightLat, Double bottomRightLon,
+            String keyword, Integer categoryId, String region
+    ) {
+
+        SearchHits<LostItemDocument> lostItems = lostItemSearchService.searchLostItems(
+                dateStart, dateEnd,
+                topLeftLat, topLeftLon,
+                bottomRightLat, bottomRightLon,
+                keyword, categoryId, region
+        );
+
+        return LostItemsSearchDto.from(lostItems);
     }
 }
