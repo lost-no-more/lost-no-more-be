@@ -10,6 +10,16 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
+    services:
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1
+        ports:
+          - 9200:9200
+        env:
+          discovery.type: single-node
+          ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+          xpack.security.enabled: "false"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,6 +42,21 @@ jobs:
         run: |
           mkdir -p ./src/main/resources
           echo "${{ secrets.APPLICATION_DEV }}" | base64 --decode > ./src/main/resources/application-dev.yml
+        shell: bash
+
+      - name: Set Environment for CI
+        run: echo "ELASTICSEARCH_URI=http://localhost:9200" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Wait for Elasticsearch
+        run: |
+          echo "Waiting for Elasticsearch to be available..."
+          timeout 60s bash -c 'until curl -s http://localhost:9200 > /dev/null; do sleep 2; echo "Still waiting..."; done'
+          echo "Elasticsearch is up!"
+        shell: bash
+
+      - name: Check Elasticsearch Health
+        run: curl -s http://localhost:9200/_cluster/health?pretty
         shell: bash
 
       - name: Build

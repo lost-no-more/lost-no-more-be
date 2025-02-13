@@ -29,16 +29,16 @@ public class Location {
     private Double latitude;
 
     @Column(name = "longtitude", nullable = false)
-    private Double longtitude;
+    private Double longitude;
 
     @Column(name = "region", nullable = false)
     private String region;
 
     @Builder
-    public Location(String name, Double latitude, Double longtitude, String region) {
+    public Location(String name, Double latitude, Double longitude, String region) {
         this.name = name;
         this.latitude = latitude;
-        this.longtitude = longtitude;
+        this.longitude = longitude;
         this.region = region;
     }
 }
