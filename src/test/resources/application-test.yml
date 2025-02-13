@@ -1,16 +1,20 @@
-spring:
-  application:
-    name: lost-no-more
-  datasource:
-    url: jdbc:h2:mem:test
-  jpa:
-    show-sql: true
-    defer-datasource-initialization: true
-    hibernate:
-      ddl-auto: create-drop
-    properties:
-      hibernate:
-        format_sql: true
+oauth2:
+  google:
+    client-id: google-client-id
+    client-secret: google-client-secret
+    redirect-url: google-redirect-url
+    scope: email
+    code-url: google-code-url
+    token-url: google-token-url
+    user-info-url: google-user-info-url
+  kakao:
+    client-id: kakao-client-id
+    client-secret: kakao-client-secret
+    redirect-url: kakao-redirect-url
+    scope: account_email
+    code-url: kakao-code-url
+    token-url: kakao-token-url
+    user-info-url: kakao-user-info-url
 
 security:
   jwt:
