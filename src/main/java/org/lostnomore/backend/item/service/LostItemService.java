@@ -27,6 +27,10 @@ import java.util.List;
 public class LostItemService {
 
     private final LostItemRetriever lostItemRetriever;
+    private final LostItemRepository lostItemRepository;
+    private final LostItemSearchRepository lostItemSearchRepository;
+    private final LocationRepository locationRepository;
+    private final CategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
     public ItemsCountDto getItemsCount() {
@@ -45,11 +49,6 @@ public class LostItemService {
 
         return RecentItemsDto.from(recentItems);
     }
-
-    private final LostItemRepository lostItemRepository;
-    private final LostItemSearchRepository lostItemSearchRepository;
-    private final LocationRepository locationRepository;
-    private final CategoryRepository categoryRepository;
 
     @Transactional
     public void saveLostItem(LostItemCreateDto request) {
