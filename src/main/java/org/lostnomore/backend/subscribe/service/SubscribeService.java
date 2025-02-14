@@ -31,24 +31,7 @@ public class SubscribeService {
         LocalDate dateStart = dateEnd.minusDays(7);
 
         List<Subscribe> subscribes = subscribeRetriever.findByUserId(userId);
-        Set<Long> lostItemIds = new HashSet<>();
-
-        for (Subscribe subscribe : subscribes) {
-            SearchHits<LostItemDocument> searchHits = lostItemSearchService.searchLostItemsForSubscription(
-                    dateStart, dateEnd,
-                    subscribe.getKeyword(),
-                    subscribe.getCategory().getId(),
-                    subscribe.getRegion(),
-                    9
-            );
-
-            lostItemIds.addAll(
-                    searchHits.getSearchHits()
-                            .stream()
-                            .map(hit -> hit.getContent().getId())
-                            .collect(Collectors.toSet())
-            );
-        }
+        Set<Long> lostItemIds = searchLostItemIds(subscribes, dateStart, dateEnd, 9);
 
         if (lostItemIds.isEmpty()) {
             return new RecentItemsDto(Collections.emptyList());
@@ -74,24 +57,7 @@ public class SubscribeService {
                     .toList();
         }
 
-        Set<Long> lostItemIds = new HashSet<>();
-
-        for (Subscribe subscribe : subscribes) {
-            SearchHits<LostItemDocument> searchHits = lostItemSearchService.searchLostItemsForSubscription(
-                    dateStart, dateEnd,
-                    subscribe.getKeyword(),
-                    subscribe.getCategory().getId(),
-                    subscribe.getRegion(),
-                    null
-            );
-
-            lostItemIds.addAll(
-                    searchHits.getSearchHits()
-                            .stream()
-                            .map(hit -> hit.getContent().getId())
-                            .collect(Collectors.toSet())
-            );
-        }
+        Set<Long> lostItemIds = searchLostItemIds(subscribes, dateStart, dateEnd, null);
 
         if (lostItemIds.isEmpty()) {
             return new SubscribeListDto(0, Collections.emptyList(), null, null);
@@ -108,5 +74,28 @@ public class SubscribeService {
         Long nextCursorId = finalLostItems.isEmpty() ? null : finalLostItems.get(finalLostItems.size() - 1).getId();
 
         return SubscribeListDto.from(finalLostItems, nextCursorDate, nextCursorId);
+    }
+
+    private Set<Long> searchLostItemIds(List<Subscribe> subscribes, LocalDate dateStart, LocalDate dateEnd, Integer size) {
+        Set<Long> lostItemIds = new HashSet<>();
+
+        for (Subscribe subscribe : subscribes) {
+            SearchHits<LostItemDocument> searchHits = lostItemSearchService.searchLostItemsForSubscription(
+                    dateStart, dateEnd,
+                    subscribe.getKeyword(),
+                    subscribe.getCategory().getId(),
+                    subscribe.getRegion(),
+                    size
+            );
+
+            lostItemIds.addAll(
+                    searchHits.getSearchHits()
+                            .stream()
+                            .map(hit -> hit.getContent().getId())
+                            .collect(Collectors.toSet())
+            );
+        }
+
+        return lostItemIds;
     }
 }
