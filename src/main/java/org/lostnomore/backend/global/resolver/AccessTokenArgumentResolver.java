@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.auth.provider.JwtTokenProvider;
 import org.lostnomore.backend.auth.util.BearerAuthorizationExtractor;
 import org.lostnomore.backend.global.LoginUser;
-import org.lostnomore.backend.global.dto.LoginUserDto;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -29,8 +28,6 @@ public class AccessTokenArgumentResolver implements HandlerMethodArgumentResolve
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         String accessToken = bearerAuthorizationExtractor.extractAccessToken(request.getHeader("Authorization"));
-        Long userId = jwtTokenProvider.getSubject(accessToken);
-
-        return new LoginUserDto(userId);
+        return jwtTokenProvider.getSubject(accessToken);
     }
 }
