@@ -85,20 +85,22 @@ public class LostItemSearchService {
         }
 
         // 위치 필터
-        GeoBoundingBoxQuery geoQuery = GeoBoundingBoxQuery.of(g -> g
-                .field("location")
-                .boundingBox(
-                        GeoBounds.of(outer -> outer.tlbr(b -> b
-                                .topLeft(GeoLocation.of(loc ->
-                                        loc.text(topLeftLat + "," + topLeftLon)
-                                ))
-                                .bottomRight(GeoLocation.of(loc ->
-                                        loc.text(bottomRightLat + "," + bottomRightLon)
-                                ))
-                        ))
-                )
-        );
-        mustQueries.add(geoQuery._toQuery());
+        if (topLeftLat != null && topLeftLon != null && bottomRightLat != null && bottomRightLon != null) {
+            GeoBoundingBoxQuery geoQuery = GeoBoundingBoxQuery.of(g -> g
+                    .field("location")
+                    .boundingBox(
+                            GeoBounds.of(outer -> outer.tlbr(b -> b
+                                    .topLeft(GeoLocation.of(loc ->
+                                            loc.text(topLeftLat + "," + topLeftLon)
+                                    ))
+                                    .bottomRight(GeoLocation.of(loc ->
+                                            loc.text(bottomRightLat + "," + bottomRightLon)
+                                    ))
+                            ))
+                    )
+            );
+            mustQueries.add(geoQuery._toQuery());
+        }
 
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder()
                 .must(mustQueries); // 필수 조건 추가
