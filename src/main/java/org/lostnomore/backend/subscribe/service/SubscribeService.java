@@ -2,7 +2,6 @@ package org.lostnomore.backend.subscribe.service;
 
 import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.item.domain.LostItem;
-import org.lostnomore.backend.item.dto.response.LostItemListDto;
 import org.lostnomore.backend.item.elastic.LostItemDocument;
 import org.lostnomore.backend.item.elastic.LostItemSearchService;
 import org.lostnomore.backend.item.manager.LostItemRetriever;
