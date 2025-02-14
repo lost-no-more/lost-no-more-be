@@ -45,6 +45,7 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
     @Query("""
       SELECT l FROM LostItem l
       JOIN FETCH l.location
+      JOIN FETCH l.category
       WHERE l.id = :lostItemId
       """)
     Optional<LostItem> findById(Long lostItemId);

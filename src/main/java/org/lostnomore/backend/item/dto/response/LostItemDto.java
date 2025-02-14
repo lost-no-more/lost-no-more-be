@@ -10,6 +10,7 @@ public record LostItemDto(
         String name,
         @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate date,
+        String category,
         String location,
         Double latitude,
         Double longitude,
@@ -20,6 +21,7 @@ public record LostItemDto(
                 lostItem.getId(),
                 lostItem.getName(),
                 lostItem.getDate(),
+                lostItem.getCategory().getName(),
                 lostItem.getLocation().getName(),
                 lostItem.getLocation().getLatitude(),
                 lostItem.getLocation().getLongitude(),
