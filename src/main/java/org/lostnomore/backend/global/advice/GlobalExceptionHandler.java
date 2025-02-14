@@ -8,6 +8,7 @@ import org.lostnomore.backend.global.exception.code.BusinessErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -43,6 +44,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ResponseDto.fail(BusinessErrorCode.MISSING_REQUIRED_PARAMETER));
+    }
+
+    @ExceptionHandler(value = {MissingRequestCookieException.class})
+    public ResponseEntity<ResponseDto<BusinessErrorCode>> handleMissingCookieException(MissingRequestCookieException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ResponseDto.fail(BusinessErrorCode.MISSING_REQUIRED_COOKIE));
     }
 
     @ExceptionHandler(value = {Exception.class})
