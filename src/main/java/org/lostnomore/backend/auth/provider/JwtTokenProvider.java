@@ -66,12 +66,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public void validateTokens(final String accessToken, final String refreshToken) {
-        validateAccessToken(accessToken);
-        validateRefreshToken(refreshToken);
-    }
-
-    private void validateAccessToken(final String accessToken) {
+    public void validateAccessToken(final String accessToken) {
         try {
             parseToken(accessToken);
         } catch (final ExpiredJwtException e) {
@@ -81,7 +76,7 @@ public class JwtTokenProvider {
         }
     }
 
-    private void validateRefreshToken(final String refreshToken) {
+    public void validateRefreshToken(final String refreshToken) {
         try {
             parseToken(refreshToken);
         } catch (final ExpiredJwtException e) {
@@ -102,6 +97,22 @@ public class JwtTokenProvider {
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token);
+    }
+    public Long getExpiredSubject(final String token) {
+        Claims claims = getClaimsFromExpiredToken(token);
+        return claims.get("userId", Long.class);
+    }
+
+    private Claims getClaimsFromExpiredToken(final String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
     }
 
     public boolean isValidRefreshAndInvalidAccess(final String refreshToken, final String accessToken) {
