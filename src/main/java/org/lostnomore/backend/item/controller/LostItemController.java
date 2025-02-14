@@ -5,7 +5,6 @@ import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.item.dto.request.LostItemIdsDto;
 import org.lostnomore.backend.item.dto.response.ItemsCountDto;
 import org.lostnomore.backend.item.dto.response.LostItemsListDto;
-import org.lostnomore.backend.item.dto.response.RecentItemsDto;
 import org.lostnomore.backend.item.dto.request.LostItemCreateDto;
 import org.lostnomore.backend.item.dto.response.LostItemsSearchDto;
 import org.lostnomore.backend.item.service.LostItemService;
@@ -29,13 +28,6 @@ public class LostItemController {
     @GetMapping("items/count")
     public ResponseEntity<ResponseDto<ItemsCountDto>> getItemsCount () {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(lostItemService.getItemsCount()));
-    }
-
-    @GetMapping("items/recent")
-    public ResponseEntity<ResponseDto<RecentItemsDto>> getRecentItems (
-            final Long userId
-    ) {
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(lostItemService.getRecentItems(userId)));
     }
 
     @PostMapping("/items")

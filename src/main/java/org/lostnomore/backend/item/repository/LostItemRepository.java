@@ -27,19 +27,9 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
     @Query("""
        SELECT l FROM LostItem l
        JOIN FETCH l.location
-       WHERE l.category IN (
-           SELECT s.category FROM Subscribe s WHERE s.user.id = :userId
-       )
-       ORDER BY l.createdDate DESC
-       """)
-    Page<LostItem> findRecentItemsByUserId(Long userId, Pageable pageable);
-
-
-    @Query("""
-       SELECT l FROM LostItem l
-       JOIN FETCH l.location
        JOIN FETCH l.category
        WHERE l.id IN :ids
+       ORDER BY l.date DESC, l.id DESC
        """)
     List<LostItem> findByIdIn(List<Long> ids);
 

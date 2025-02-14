@@ -2,10 +2,12 @@ package org.lostnomore.backend.subscribe.service;
 
 import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.item.domain.LostItem;
+import org.lostnomore.backend.item.dto.response.LostItemListDto;
 import org.lostnomore.backend.item.elastic.LostItemDocument;
 import org.lostnomore.backend.item.elastic.LostItemSearchService;
 import org.lostnomore.backend.item.manager.LostItemRetriever;
 import org.lostnomore.backend.subscribe.domain.Subscribe;
+import org.lostnomore.backend.subscribe.dto.response.RecentItemsDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
 import org.lostnomore.backend.subscribe.manager.SubscribeRetriever;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -23,6 +25,38 @@ public class SubscribeService {
     private final SubscribeRetriever subscribeRetriever;
     private final LostItemSearchService lostItemSearchService;
     private final LostItemRetriever lostItemRetriever;
+
+    @Transactional(readOnly = true)
+    public RecentItemsDto getRecentItems(final Long userId) {
+        LocalDate dateEnd = LocalDate.now().minusDays(1);
+        LocalDate dateStart = dateEnd.minusDays(7);
+
+        List<Subscribe> subscribes = subscribeRetriever.findByUserId(userId);
+        Set<Long> lostItemIds = new HashSet<>();
+
+        for (Subscribe subscribe : subscribes) {
+            SearchHits<LostItemDocument> searchHits = lostItemSearchService.searchLostItemsForSubscription(
+                    dateStart, dateEnd,
+                    subscribe.getKeyword(),
+                    subscribe.getCategory().getId(),
+                    subscribe.getRegion(),
+                    9
+            );
+
+            lostItemIds.addAll(
+                    searchHits.getSearchHits()
+                            .stream()
+                            .map(hit -> hit.getContent().getId())
+                            .collect(Collectors.toSet())
+            );
+        }
+
+        if (lostItemIds.isEmpty()) {
+            return new RecentItemsDto(Collections.emptyList());
+        }
+
+        return RecentItemsDto.from(lostItemRetriever.findByIdIn(new ArrayList<>(lostItemIds)));
+    }
 
     @Transactional(readOnly = true)
     public SubscribeListDto getSubscribeList(
@@ -48,7 +82,8 @@ public class SubscribeService {
                     dateStart, dateEnd,
                     subscribe.getKeyword(),
                     subscribe.getCategory().getId(),
-                    subscribe.getRegion()
+                    subscribe.getRegion(),
+                    null
             );
 
             lostItemIds.addAll(

@@ -13,9 +13,6 @@ import org.lostnomore.backend.item.elastic.LostItemSearchService;
 import org.lostnomore.backend.item.manager.*;
 import jakarta.persistence.Tuple;
 import org.lostnomore.backend.item.dto.response.ItemsCountDto;
-import org.lostnomore.backend.item.dto.response.RecentItemsDto;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.stereotype.Service;
@@ -44,14 +41,6 @@ public class LostItemService {
         Long totalCount = stats.get(1, Long.class);
 
         return ItemsCountDto.of(todayCount.intValue(), totalCount.intValue());
-    }
-
-    @Transactional(readOnly = true)
-    public RecentItemsDto getRecentItems(final Long userId) {
-        Pageable pageable = PageRequest.of(0, 9);
-        List<LostItem> recentItems = lostItemRetriever.findRecentItemsByUserId(userId, pageable).getContent();
-
-        return RecentItemsDto.from(recentItems);
     }
 
     @Transactional
@@ -107,7 +96,7 @@ public class LostItemService {
                 dateStart, dateEnd,
                 topLeftLat, topLeftLon,
                 bottomRightLat, bottomRightLon,
-                keyword, categoryId, region
+                keyword, categoryId, region, null
         );
 
         return LostItemsSearchDto.from(lostItems);

@@ -24,13 +24,6 @@ public class LostItemRetriever {
         return lostItemRepository.findItemCountByCreatedAtAfter(today);
     }
 
-    public Page<LostItem> findRecentItemsByUserId(
-            final Long userId,
-            final Pageable pageable
-    ) {
-        return lostItemRepository.findRecentItemsByUserId(userId, pageable);
-    }
-
     public List<LostItem> findByIdIn(List<Long> ids) {
         return lostItemRepository.findByIdIn(ids);
     }
