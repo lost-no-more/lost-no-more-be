@@ -55,7 +55,7 @@ public class LostItemController {
             @RequestParam Double bottom_right_lat,
             @RequestParam Double bottom_right_lon,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer category_id,
+            @RequestParam(required = false) Long category_id,
             @RequestParam(required = false) String region
     ) {
         return ResponseEntity.ok(ResponseDto.success(lostItemService.searchLostItems(

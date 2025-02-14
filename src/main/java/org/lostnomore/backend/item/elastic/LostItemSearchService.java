@@ -31,7 +31,7 @@ public class LostItemSearchService {
             Double bottomRightLat,
             Double bottomRightLon,
             String keyword,
-            Integer categoryId,
+            Long categoryId,
             String region
     ) {
 
@@ -117,5 +117,12 @@ public class LostItemSearchService {
                 .build();
 
         return elasticsearchOperations.search(searchQuery, LostItemDocument.class);
+    }
+
+    @Transactional(readOnly = true)
+    public SearchHits<LostItemDocument> searchLostItemsForSubscription(
+            LocalDate dateStart, LocalDate dateEnd,
+            String keyword, Long categoryId, String region) {
+        return searchLostItems(dateStart, dateEnd, null, null, null, null, keyword, categoryId, region);
     }
 }

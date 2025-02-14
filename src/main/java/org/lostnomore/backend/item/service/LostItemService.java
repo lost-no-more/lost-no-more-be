@@ -1,12 +1,10 @@
 package org.lostnomore.backend.item.service;
 
 import lombok.RequiredArgsConstructor;
-import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.item.domain.Category;
 import org.lostnomore.backend.item.domain.Location;
 import org.lostnomore.backend.item.domain.LostItem;
 import org.lostnomore.backend.item.dto.request.LostItemCreateDto;
-import org.lostnomore.backend.item.dto.request.LostItemIdsDto;
 import org.lostnomore.backend.item.dto.response.LostItemsListDto;
 import org.lostnomore.backend.item.dto.response.LostItemsSearchDto;
 import org.lostnomore.backend.item.elastic.LostItemDocument;
@@ -20,7 +18,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,7 +100,7 @@ public class LostItemService {
             LocalDate dateStart, LocalDate dateEnd,
             Double topLeftLat, Double topLeftLon,
             Double bottomRightLat, Double bottomRightLon,
-            String keyword, Integer categoryId, String region
+            String keyword, Long categoryId, String region
     ) {
 
         SearchHits<LostItemDocument> lostItems = lostItemSearchService.searchLostItems(
