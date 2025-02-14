@@ -5,7 +5,6 @@ import org.lostnomore.backend.item.domain.Category;
 import org.lostnomore.backend.item.domain.Location;
 import org.lostnomore.backend.item.domain.LostItem;
 import org.lostnomore.backend.item.dto.request.LostItemCreateDto;
-import org.lostnomore.backend.item.dto.request.LostItemIdsDto;
 import org.lostnomore.backend.item.dto.response.*;
 import org.lostnomore.backend.item.elastic.LostItemDocument;
 import org.lostnomore.backend.item.elastic.LostItemSearchRepository;

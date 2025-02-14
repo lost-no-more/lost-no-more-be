@@ -38,6 +38,8 @@ public class LostItemRetriever {
     ) {
         return lostItemRepository.findByIdInWithCursorPagination(ids, cursorDate, cursorId, size);
 
+    }
+
     public LostItem findById(final Long lostItemId) {
         return lostItemRepository.findById(lostItemId)
                 .orElseThrow(() -> new BusinessException(ItemErrorCode.ITEM_NOT_FOUND));
