@@ -9,7 +9,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,16 +20,16 @@ public class SubscribeController {
 
     private final SubscribeService subscribeService;
 
-    @GetMapping("items/recent/{userId}")
+    @GetMapping("items/recent")
     public ResponseEntity<ResponseDto<RecentItemsDto>> getRecentItems (
-            @PathVariable final Long userId
+            final Long userId
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(subscribeService.getRecentItems(userId)));
     }
 
-    @GetMapping("/subscribe/list/{userId}")
+    @GetMapping("/subscribe/list")
     public ResponseEntity<ResponseDto<SubscribeListDto>> getSubscribeList(
-            @PathVariable final Long userId,
+            final Long userId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date_start,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date_end,
             @RequestParam(required = false) String keyword,
