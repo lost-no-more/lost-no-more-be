@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +25,8 @@ import org.lostnomore.backend.auth.repository.RefreshTokenRepository;
 import org.lostnomore.backend.auth.util.BearerAuthorizationExtractor;
 import org.lostnomore.backend.common.ServiceTest;
 import org.lostnomore.backend.global.exception.BusinessException;
+import org.lostnomore.backend.notification.service.NotificationService;
+import org.lostnomore.backend.subscribe.service.SubscribeService;
 import org.lostnomore.backend.user.domain.SocialType;
 import org.lostnomore.backend.user.domain.User;
 import org.lostnomore.backend.user.manager.UserCreator;
@@ -35,6 +38,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest extends ServiceTest {
+
+    @Mock
+    private SubscribeService subscribeService;
+
+    @Mock
+    private NotificationService notificationService;
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
@@ -119,5 +128,35 @@ class AuthServiceTest extends ServiceTest {
         // when & then
         assertThatThrownBy(() -> authService.reissue(refreshToken, anyString()))
                 .isInstanceOf(BusinessException.class);
+    }
+
+    @Test
+    void 로그아웃_성공() {
+        // given
+        doNothing().when(refreshTokenRepository).deleteById(refreshToken);
+
+        // when
+        authService.logout(refreshToken);
+
+        // then
+        verify(refreshTokenRepository, times(1)).deleteById(refreshToken);
+    }
+
+    @Test
+    void 회원탈퇴_성공() {
+        // given
+        doNothing().when(refreshTokenRepository).deleteById(refreshToken);
+        doNothing().when(subscribeService).deleteByUserId(userId);
+        doNothing().when(notificationService).deleteByUserId(userId);
+        doNothing().when(userService).deleteByUserId(userId);
+
+        // when
+        authService.withdraw(userId, refreshToken);
+
+        // then
+        verify(refreshTokenRepository, times(1)).deleteById(refreshToken);
+        verify(subscribeService, times(1)).deleteByUserId(userId);
+        verify(notificationService, times(1)).deleteByUserId(userId);
+        verify(userService, times(1)).deleteByUserId(userId);
     }
 }
