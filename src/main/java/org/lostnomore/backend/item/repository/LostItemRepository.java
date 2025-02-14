@@ -43,7 +43,7 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
        ORDER BY l.date DESC, l.id DESC
        LIMIT :size
        """)
-    List<LostItem> findByIdInWithCursorPagination(ArrayList<Long> ids, LocalDate cursorDate, Long cursorId, int size);
+    List<LostItem> findByIdInWithCursorPagination(List<Long> ids, LocalDate cursorDate, Long cursorId, int size);
 
     @Query("""
       SELECT l FROM LostItem l

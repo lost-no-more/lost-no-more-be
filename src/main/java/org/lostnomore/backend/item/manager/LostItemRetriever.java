@@ -31,7 +31,7 @@ public class LostItemRetriever {
     }
 
     public List<LostItem> findByIdInWithCursorPagination(
-            final ArrayList<Long> ids,
+            final List<Long> ids,
             final LocalDate cursorDate,
             final Long cursorId,
             final int size
