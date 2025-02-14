@@ -18,8 +18,6 @@ import org.lostnomore.backend.common.ControllerTest;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.AuthErrorCode;
 import org.lostnomore.backend.global.exception.code.BusinessErrorCode;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -27,7 +25,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @WebMvcTest(AuthController.class)
 class AuthControllerTest extends ControllerTest {
 
-    @Mock
+    @MockitoBean
     private OAuthProvider oAuthProvider;
 
     @MockitoBean
@@ -35,9 +33,6 @@ class AuthControllerTest extends ControllerTest {
 
     @MockitoBean
     private CookieProvider cookieProvider;
-
-    @InjectMocks
-    private AuthController authController;
 
     private final static String REFRESH_TOKEN = "refreshToken";
     private final static String ACCESS_TOKEN = "accessToken";

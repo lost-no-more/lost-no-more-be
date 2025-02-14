@@ -1,10 +1,10 @@
 package org.lostnomore.backend.auth.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -12,8 +12,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.lostnomore.backend.auth.domain.RefreshToken;
 import org.lostnomore.backend.auth.dto.UserTokenDto;
 import org.lostnomore.backend.auth.provider.JwtTokenProvider;
 import org.lostnomore.backend.auth.provider.OAuthProvider;
@@ -95,28 +97,27 @@ class AuthServiceTest extends ServiceTest {
     }
 
     @Test
-    void 토큰들이_만료되지_않으면_기존_토큰_반환() {
+    void 리프레시_토큰_저장소에_존재하지_않으면_오류() {
         // given
+        doNothing().when(jwtTokenProvider).validateRefreshToken(anyString());
         when(bearerAuthorizationExtractor.extractAccessToken(anyString())).thenReturn(accessToken);
-        when(jwtTokenProvider.isValidRefreshAndInvalidAccess(refreshToken, accessToken)).thenReturn(false);
-        when(jwtTokenProvider.isValidRefreshAndValidAccess(refreshToken, accessToken)).thenReturn(true);
-        // when
-        UserTokenDto reissue = authService.reissue(refreshToken, accessToken);
+        when(refreshTokenRepository.findById(refreshToken)).thenReturn(Optional.empty());
 
-        // then
-        assertThat(reissue.getAccessToken()).isEqualTo(accessToken);
-        assertThat(reissue.getRefreshToken()).isNull();
+        // when & then
+        assertThatThrownBy(() -> authService.reissue(refreshToken, anyString()))
+                .isInstanceOf(BusinessException.class);
     }
 
     @Test
-    void 토큰들이_모두_만료되면_오류() {
+    void 만료된_엑세스_토큰의_userId와_리프레시_토큰_저장소의_토큰의_userId가_다를_시_오류() {
         // given
+        doNothing().when(jwtTokenProvider).validateRefreshToken(anyString());
         when(bearerAuthorizationExtractor.extractAccessToken(anyString())).thenReturn(accessToken);
-        when(jwtTokenProvider.isValidRefreshAndInvalidAccess(refreshToken, accessToken)).thenReturn(false);
-        when(jwtTokenProvider.isValidRefreshAndValidAccess(refreshToken, accessToken)).thenReturn(false);
+        when(refreshTokenRepository.findById(refreshToken)).thenReturn(Optional.of(new RefreshToken(refreshToken, 1L)));
+        when(jwtTokenProvider.getExpiredSubject(accessToken)).thenReturn(2L);
 
         // when & then
-        assertThatThrownBy(() -> authService.reissue(refreshToken, accessToken))
+        assertThatThrownBy(() -> authService.reissue(refreshToken, anyString()))
                 .isInstanceOf(BusinessException.class);
     }
 }

@@ -1,7 +1,5 @@
 package org.lostnomore.backend.auth.service;
 
-import static org.lostnomore.backend.global.exception.code.AuthErrorCode.FAIL_TO_VALIDATE_TOKEN;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lostnomore.backend.auth.domain.RefreshToken;
@@ -59,30 +57,25 @@ public class AuthService {
         return loginToken;
     }
 
-    public UserTokenDto reissue(String refreshTokenRequest, String authorizationHeader) {
-        final String accessToken = bearerExtractor.extractAccessToken(authorizationHeader);
+    public UserTokenDto reissue(String refreshTokenRequest, String requestHeader) {
+        jwtTokenProvider.validateRefreshToken(refreshTokenRequest);
+        String expiredAccessToken = bearerExtractor.extractAccessToken(requestHeader);
 
-        if (jwtTokenProvider.isValidRefreshAndInvalidAccess(refreshTokenRequest, accessToken)) {
-            final RefreshToken refreshToken = refreshTokenRepository.findById(refreshTokenRequest)
-                    .orElseThrow(() -> new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN));
+        final RefreshToken refreshToken = refreshTokenRepository.findById(refreshTokenRequest)
+                .orElseThrow(() -> new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN));
 
-            Long userId = refreshToken.getUserId();
+        Long userId = jwtTokenProvider.getExpiredSubject(expiredAccessToken);
 
-            String regeneratedAccessToken = jwtTokenProvider.regenerateAccessToken(userId);
-            String regeneratedRefreshToken = jwtTokenProvider.regenerateRefreshToken(userId);
-
-            refreshTokenRepository.deleteById(refreshTokenRequest);
-
-            RefreshToken savedRefreshToken = new RefreshToken(regeneratedRefreshToken, userId);
-            refreshTokenRepository.save(savedRefreshToken);
-
-            return new UserTokenDto(regeneratedAccessToken, regeneratedRefreshToken);
+        if (!refreshToken.getUserId().equals(userId)) {
+            throw new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        if (jwtTokenProvider.isValidRefreshAndValidAccess(refreshTokenRequest, accessToken)) {
-            return new UserTokenDto(accessToken, null);
-        }
+        String regeneratedAccessToken = jwtTokenProvider.regenerateAccessToken(userId);
+        String regeneratedRefreshToken = jwtTokenProvider.regenerateRefreshToken(userId);
 
-        throw new BusinessException(FAIL_TO_VALIDATE_TOKEN);
+        refreshTokenRepository.deleteById(refreshTokenRequest);
+        refreshTokenRepository.save(new RefreshToken(regeneratedRefreshToken, userId));
+
+        return new UserTokenDto(regeneratedAccessToken, regeneratedRefreshToken);
     }
 }
