@@ -52,10 +52,9 @@ class JwtTokenProviderTest {
         // given
         JwtTokenProvider tokenProvider = new JwtTokenProvider(JWT_SECRET_KEY, 0, 10000000);
         String expiredAccessToken = tokenProvider.createAccessToken(PAYLOAD);
-        String nonExpiredRefreshToken = tokenProvider.createRefreshToken(PAYLOAD);
 
         // when & then
-        assertThatThrownBy(() -> jwtTokenProvider.validateTokens(expiredAccessToken, nonExpiredRefreshToken))
+        assertThatThrownBy(() -> jwtTokenProvider.validateAccessToken(expiredAccessToken))
                 .isInstanceOf(ExpiredPeriodJwtException.class);
     }
 
@@ -63,11 +62,10 @@ class JwtTokenProviderTest {
     void 리프레시_토큰을_검증하여_만료된_경우_예외() {
         // given
         JwtTokenProvider tokenProvider = new JwtTokenProvider(JWT_SECRET_KEY, 10000000, 0);
-        String nonexpiredAccessToken = tokenProvider.createAccessToken(PAYLOAD);
         String expiredRefreshToken = tokenProvider.createRefreshToken(PAYLOAD);
 
         // when & then
-        assertThatThrownBy(() -> jwtTokenProvider.validateTokens(nonexpiredAccessToken, expiredRefreshToken))
+        assertThatThrownBy(() -> jwtTokenProvider.validateRefreshToken(expiredRefreshToken))
                 .isInstanceOf(ExpiredPeriodJwtException.class);
     }
 
@@ -75,10 +73,9 @@ class JwtTokenProviderTest {
     void 잘못된_토큰_양식일_경우_예외() {
         // given
         String wrongToken = "wrong-token";
-        String rigntToken = "right-token";
 
         // when & then
-        assertThatThrownBy(() -> jwtTokenProvider.validateTokens(wrongToken, rigntToken))
+        assertThatThrownBy(() -> jwtTokenProvider.validateAccessToken(wrongToken))
                 .isInstanceOf(InvalidJwtException.class);
     }
 }

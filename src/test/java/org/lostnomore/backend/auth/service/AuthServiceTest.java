@@ -101,7 +101,7 @@ class AuthServiceTest extends ServiceTest {
         when(jwtTokenProvider.isValidRefreshAndInvalidAccess(refreshToken, accessToken)).thenReturn(false);
         when(jwtTokenProvider.isValidRefreshAndValidAccess(refreshToken, accessToken)).thenReturn(true);
         // when
-        UserTokenDto reissue = authService.reissue(refreshToken, accessToken);
+        UserTokenDto reissue = authService.reissue(refreshToken, anyString());
 
         // then
         assertThat(reissue.getAccessToken()).isEqualTo(accessToken);
@@ -116,7 +116,7 @@ class AuthServiceTest extends ServiceTest {
         when(jwtTokenProvider.isValidRefreshAndValidAccess(refreshToken, accessToken)).thenReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> authService.reissue(refreshToken, accessToken))
+        assertThatThrownBy(() -> authService.reissue(refreshToken, anyString()))
                 .isInstanceOf(BusinessException.class);
     }
 }
