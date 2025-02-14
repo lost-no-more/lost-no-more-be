@@ -2,11 +2,11 @@ package org.lostnomore.backend.subscribe.service;
 
 import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.item.domain.LostItem;
-import org.lostnomore.backend.item.dto.response.LostItemsListDto;
 import org.lostnomore.backend.item.elastic.LostItemDocument;
 import org.lostnomore.backend.item.elastic.LostItemSearchService;
 import org.lostnomore.backend.item.manager.LostItemRetriever;
 import org.lostnomore.backend.subscribe.domain.Subscribe;
+import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
 import org.lostnomore.backend.subscribe.manager.SubscribeRetriever;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
@@ -25,10 +25,13 @@ public class SubscribeService {
     private final LostItemRetriever lostItemRetriever;
 
     @Transactional(readOnly = true)
-    public LostItemsListDto getSubscribeList(
+    public SubscribeListDto getSubscribeList(
             final Long userId,
             final LocalDate dateStart, final LocalDate dateEnd,
-            final String keyword
+            final String keyword,
+            final LocalDate cursorDate,
+            final Long cursorId,
+            final int size
     ) {
         List<Subscribe> subscribes = subscribeRetriever.findByUserId(userId);
 
@@ -57,11 +60,19 @@ public class SubscribeService {
         }
 
         if (lostItemIds.isEmpty()) {
-            return new LostItemsListDto(0, Collections.emptyList());
+            return new SubscribeListDto(0, Collections.emptyList(), null, null);
         }
 
-        List<LostItem> finalLostItems = lostItemRetriever.findByIdIn(new ArrayList<>(lostItemIds));
+        List<LostItem> finalLostItems = lostItemRetriever.findByIdInWithCursorPagination(
+                new ArrayList<>(lostItemIds),
+                cursorDate,
+                cursorId,
+                size
+        );
 
-        return LostItemsListDto.from(finalLostItems);
+        LocalDate nextCursorDate = finalLostItems.isEmpty() ? null : finalLostItems.get(finalLostItems.size() - 1).getDate();
+        Long nextCursorId = finalLostItems.isEmpty() ? null : finalLostItems.get(finalLostItems.size() - 1).getId();
+
+        return SubscribeListDto.from(finalLostItems, nextCursorDate, nextCursorId);
     }
 }

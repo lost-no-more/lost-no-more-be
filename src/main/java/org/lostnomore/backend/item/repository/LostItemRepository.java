@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface LostItemRepository extends JpaRepository<LostItem, Long> {
@@ -40,4 +42,15 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
        WHERE l.id IN :ids
        """)
     List<LostItem> findByIdIn(List<Long> ids);
+
+    @Query("""
+       SELECT l FROM LostItem l
+       JOIN FETCH l.location
+       JOIN FETCH l.category
+       WHERE l.id IN :ids
+       AND (:cursorDate IS NULL OR (l.date < :cursorDate OR (l.date = :cursorDate AND l.id < :cursorId)))\s
+       ORDER BY l.date DESC, l.id DESC
+       LIMIT :size
+       """)
+    List<LostItem> findByIdInWithCursorPagination(ArrayList<Long> ids, LocalDate cursorDate, Long cursorId, int size);
 }
