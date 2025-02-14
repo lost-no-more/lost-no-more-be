@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public interface LostItemRepository extends JpaRepository<LostItem, Long> {
 
@@ -43,4 +44,12 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
        LIMIT :size
        """)
     List<LostItem> findByIdInWithCursorPagination(ArrayList<Long> ids, LocalDate cursorDate, Long cursorId, int size);
+
+    @Query("""
+      SELECT l FROM LostItem l
+      JOIN FETCH l.location
+      JOIN FETCH l.category
+      WHERE l.id = :lostItemId
+      """)
+    Optional<LostItem> findById(Long lostItemId);
 }
