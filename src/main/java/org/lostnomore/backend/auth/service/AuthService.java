@@ -10,6 +10,8 @@ import org.lostnomore.backend.auth.repository.RefreshTokenRepository;
 import org.lostnomore.backend.auth.util.BearerAuthorizationExtractor;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.AuthErrorCode;
+import org.lostnomore.backend.notification.service.NotificationService;
+import org.lostnomore.backend.subscribe.service.SubscribeService;
 import org.lostnomore.backend.user.domain.SocialType;
 import org.lostnomore.backend.user.domain.User;
 import org.lostnomore.backend.user.manager.UserCreator;
@@ -30,6 +32,8 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final BearerAuthorizationExtractor bearerExtractor;
+    private final SubscribeService subscribeService;
+    private final NotificationService notificationService;
 
     public String getCodeLink(String provider) {
         return oAuthProviderFinder.getOAuthProvider(provider).getCodeUrl();
@@ -57,6 +61,7 @@ public class AuthService {
         return loginToken;
     }
 
+    @Transactional
     public UserTokenDto reissue(String refreshTokenRequest, String requestHeader) {
         jwtTokenProvider.validateRefreshToken(refreshTokenRequest);
         String expiredAccessToken = bearerExtractor.extractAccessToken(requestHeader);
@@ -77,5 +82,19 @@ public class AuthService {
         refreshTokenRepository.save(new RefreshToken(regeneratedRefreshToken, userId));
 
         return new UserTokenDto(regeneratedAccessToken, regeneratedRefreshToken);
+    }
+
+    @Transactional
+    public void logout(String refreshToken) {
+        refreshTokenRepository.deleteById(refreshToken);
+    }
+
+    @Transactional
+    public void withdraw(Long userId, String refreshToken) {
+        refreshTokenRepository.deleteById(refreshToken);
+
+        subscribeService.deleteByUserId(userId);
+        notificationService.deleteByUserId(userId);
+        userService.deleteByUserId(userId);
     }
 }
