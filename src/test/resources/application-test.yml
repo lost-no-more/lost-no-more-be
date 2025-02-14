@@ -1,3 +1,9 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 oauth2:
   google:
     client-id: google-client-id
@@ -19,7 +25,6 @@ oauth2:
 security:
   jwt:
     token:
-      access-secret-key: accessSecretKey
-      refresh-secret-key: refreshSecretKey
-      access-token-expired: 30m
-      refresh-token-expired: 14d
+      secret-key: tetqwfqfoqiwjfqwejklnqwklfjnqwlfknqwklgvnqlgnvlkqwfgnmklqwfgnmlqwlmk
+      access-expire-length: 10 #20분
+      refresh-expire-length: 1209600000 #2주
