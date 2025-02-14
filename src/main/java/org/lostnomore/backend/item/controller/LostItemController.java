@@ -3,11 +3,8 @@ package org.lostnomore.backend.item.controller;
 import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.item.dto.request.LostItemIdsDto;
-import org.lostnomore.backend.item.dto.response.ItemsCountDto;
-import org.lostnomore.backend.item.dto.response.LostItemsListDto;
-import org.lostnomore.backend.item.dto.response.RecentItemsDto;
+import org.lostnomore.backend.item.dto.response.*;
 import org.lostnomore.backend.item.dto.request.LostItemCreateDto;
-import org.lostnomore.backend.item.dto.response.LostItemsSearchDto;
 import org.lostnomore.backend.item.service.LostItemService;
 import org.springframework.http.HttpStatus;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -73,5 +70,12 @@ public class LostItemController {
             @RequestBody final LostItemIdsDto lostItemIdsDto
     ) {
         return ResponseEntity.ok().body(ResponseDto.success(lostItemService.searchLostItemsList(lostItemIdsDto.ids())));
+    }
+
+    @GetMapping("/items/search/{lostItemId}")
+    public ResponseEntity<ResponseDto<LostItemDto>> getLostItem (
+            @PathVariable final Long lostItemId
+    ) {
+        return ResponseEntity.ok().body(ResponseDto.success(lostItemService.getLostItem(lostItemId)));
     }
 }
