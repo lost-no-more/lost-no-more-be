@@ -5,10 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.auth.dto.UserTokenDto;
 import org.lostnomore.backend.auth.provider.CookieProvider;
 import org.lostnomore.backend.auth.service.AuthService;
+import org.lostnomore.backend.global.LoginUser;
+import org.lostnomore.backend.global.dto.LoginUserDto;
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,5 +50,19 @@ public class AuthController {
         UserTokenDto userTokenDto = authService.reissue(refreshToken, authorizationHeader);
         cookieProvider.createCookie(userTokenDto.getRefreshToken(), response);
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokenDto.getAccessToken()));
+    }
+
+    @DeleteMapping("/logout")
+    public ResponseEntity<ResponseDto> logout(@LoginUser final LoginUserDto loginUser,
+                                       @CookieValue("refresh-token") final String refreshToken) {
+        authService.logout(refreshToken);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success());
+    }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<ResponseDto> withdraw(@LoginUser final LoginUserDto loginUser,
+                                       @CookieValue("refresh-token") final String refreshToken) {
+        authService.withdraw(loginUser.userId(), refreshToken);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success());
     }
 }
