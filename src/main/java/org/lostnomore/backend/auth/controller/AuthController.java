@@ -53,16 +53,16 @@ public class AuthController {
     }
 
     @DeleteMapping("/logout")
-    public ResponseEntity<ResponseDto> logout(@LoginUser final LoginUserDto loginUser,
+    public ResponseEntity<ResponseDto> logout(@LoginUser final Long userId,
                                        @CookieValue("refresh-token") final String refreshToken) {
         authService.logout(refreshToken);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success());
     }
 
     @DeleteMapping("/withdraw")
-    public ResponseEntity<ResponseDto> withdraw(@LoginUser final LoginUserDto loginUser,
+    public ResponseEntity<ResponseDto> withdraw(@LoginUser final Long userId,
                                        @CookieValue("refresh-token") final String refreshToken) {
-        authService.withdraw(loginUser.userId(), refreshToken);
+        authService.withdraw(userId, refreshToken);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success());
     }
 }
