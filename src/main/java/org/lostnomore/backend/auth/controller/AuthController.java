@@ -6,7 +6,6 @@ import org.lostnomore.backend.auth.dto.UserTokenDto;
 import org.lostnomore.backend.auth.provider.CookieProvider;
 import org.lostnomore.backend.auth.service.AuthService;
 import org.lostnomore.backend.global.LoginUser;
-import org.lostnomore.backend.global.dto.LoginUserDto;
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
