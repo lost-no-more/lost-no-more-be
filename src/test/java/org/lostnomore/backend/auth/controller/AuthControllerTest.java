@@ -12,8 +12,10 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.lostnomore.backend.auth.dto.UserTokenDto;
 import org.lostnomore.backend.auth.provider.CookieProvider;
+import org.lostnomore.backend.auth.provider.JwtTokenProvider;
 import org.lostnomore.backend.auth.provider.OAuthProvider;
 import org.lostnomore.backend.auth.service.AuthService;
+import org.lostnomore.backend.auth.util.BearerAuthorizationExtractor;
 import org.lostnomore.backend.common.ControllerTest;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.AuthErrorCode;
@@ -27,8 +29,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @WebMvcTest(AuthController.class)
 class AuthControllerTest extends ControllerTest {
 
-    @Mock
+    @MockitoBean
     private OAuthProvider oAuthProvider;
+
+    @MockitoBean
+    private JwtTokenProvider jwtTokenProvider;
 
     @MockitoBean
     private AuthService authService;
@@ -36,8 +41,8 @@ class AuthControllerTest extends ControllerTest {
     @MockitoBean
     private CookieProvider cookieProvider;
 
-    @InjectMocks
-    private AuthController authController;
+    @MockitoBean
+    private BearerAuthorizationExtractor bearerAuthorizationExtractor;
 
     private final static String REFRESH_TOKEN = "refreshToken";
     private final static String ACCESS_TOKEN = "accessToken";
