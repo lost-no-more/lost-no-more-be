@@ -2,6 +2,8 @@ package org.lostnomore.backend.item.elastic;
 
 import co.elastic.clients.elasticsearch._types.GeoBounds;
 import co.elastic.clients.elasticsearch._types.GeoLocation;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.json.JsonData;
 
@@ -112,8 +114,15 @@ public class LostItemSearchService {
 
         Query boolQuery = boolQueryBuilder.build()._toQuery();
 
+        List<SortOptions> sortOptions = List.of(
+                SortOptions.of(s -> s.field(f -> f.field("date").order(SortOrder.Desc))),
+                SortOptions.of(s -> s.field(f -> f.field("id").order(SortOrder.Desc)))
+        );
+
         NativeQuery searchQuery = NativeQuery.builder()
                 .withQuery(boolQuery)
+                .withSort(sortOptions)
+                .withPageable(size != null ? PageRequest.of(0, size) : Pageable.unpaged())
                 .build();
 
         return elasticsearchOperations.search(searchQuery, LostItemDocument.class);
