@@ -2,6 +2,8 @@ package org.lostnomore.backend.item.manager;
 
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
+import org.lostnomore.backend.global.exception.BusinessException;
+import org.lostnomore.backend.global.exception.code.ItemErrorCode;
 import org.lostnomore.backend.item.domain.LostItem;
 import org.lostnomore.backend.item.dto.request.LostItemIdsDto;
 import org.lostnomore.backend.item.repository.LostItemRepository;
@@ -31,5 +33,10 @@ public class LostItemRetriever {
 
     public List<LostItem> findByIdIn(List<Long> ids) {
         return lostItemRepository.findByIdIn(ids);
+    }
+
+    public LostItem findById(final Long lostItemId) {
+        return lostItemRepository.findById(lostItemId)
+                .orElseThrow(() -> new BusinessException(ItemErrorCode.ITEM_NOT_FOUND));
     }
 }

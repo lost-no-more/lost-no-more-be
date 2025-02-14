@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface LostItemRepository extends JpaRepository<LostItem, Long> {
 
@@ -40,4 +41,11 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
        WHERE l.id IN :ids
        """)
     List<LostItem> findByIdIn(List<Long> ids);
+
+    @Query("""
+      SELECT l FROM LostItem l
+      JOIN FETCH l.location
+      WHERE l.id = :lostItemId
+      """)
+    Optional<LostItem> findById(Long lostItemId);
 }

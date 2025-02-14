@@ -7,15 +7,12 @@ import org.lostnomore.backend.item.domain.Location;
 import org.lostnomore.backend.item.domain.LostItem;
 import org.lostnomore.backend.item.dto.request.LostItemCreateDto;
 import org.lostnomore.backend.item.dto.request.LostItemIdsDto;
-import org.lostnomore.backend.item.dto.response.LostItemsListDto;
-import org.lostnomore.backend.item.dto.response.LostItemsSearchDto;
+import org.lostnomore.backend.item.dto.response.*;
 import org.lostnomore.backend.item.elastic.LostItemDocument;
 import org.lostnomore.backend.item.elastic.LostItemSearchRepository;
 import org.lostnomore.backend.item.elastic.LostItemSearchService;
 import org.lostnomore.backend.item.manager.*;
 import jakarta.persistence.Tuple;
-import org.lostnomore.backend.item.dto.response.ItemsCountDto;
-import org.lostnomore.backend.item.dto.response.RecentItemsDto;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -119,5 +116,9 @@ public class LostItemService {
     @Transactional(readOnly = true)
     public LostItemsListDto searchLostItemsList(final List<Long> ids) {
         return LostItemsListDto.from(lostItemRetriever.findByIdIn(ids));
+    }
+
+    public LostItemDto getLostItem(final Long lostItemId) {
+        return LostItemDto.from(lostItemRetriever.findById(lostItemId));
     }
 }
