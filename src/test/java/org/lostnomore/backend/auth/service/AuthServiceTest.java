@@ -17,6 +17,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lostnomore.backend.auth.domain.RefreshToken;
+import org.lostnomore.backend.auth.dto.UserInfoDto;
 import org.lostnomore.backend.auth.dto.UserTokenDto;
 import org.lostnomore.backend.auth.provider.JwtTokenProvider;
 import org.lostnomore.backend.auth.provider.OAuthProvider;
@@ -25,8 +26,8 @@ import org.lostnomore.backend.auth.repository.RefreshTokenRepository;
 import org.lostnomore.backend.auth.util.BearerAuthorizationExtractor;
 import org.lostnomore.backend.common.ServiceTest;
 import org.lostnomore.backend.global.exception.BusinessException;
-import org.lostnomore.backend.notification.service.NotificationService;
-import org.lostnomore.backend.subscribe.service.SubscribeService;
+import org.lostnomore.backend.notification.manager.UserNotificationRemover;
+import org.lostnomore.backend.subscribe.manager.SubscribeRemover;
 import org.lostnomore.backend.user.domain.SocialType;
 import org.lostnomore.backend.user.domain.User;
 import org.lostnomore.backend.user.manager.UserCreator;
@@ -40,10 +41,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AuthServiceTest extends ServiceTest {
 
     @Mock
-    private SubscribeService subscribeService;
+    private SubscribeRemover subscribeRemover;
 
     @Mock
-    private NotificationService notificationService;
+    private UserNotificationRemover userNotificationRemover;
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
@@ -73,6 +74,7 @@ class AuthServiceTest extends ServiceTest {
     private final String accessToken = "access-token";
     private final String provider = "google";
     private final String oauthCode = "oauth-code";
+    private final Long providerId = 1L;
     private final String email = "test@example.com";
     private final String name = "test_name";
     private final Long userId = 1L;
@@ -84,9 +86,10 @@ class AuthServiceTest extends ServiceTest {
         OAuthProvider mockOAuthProvider = mock(OAuthProvider.class);
         when(oAuthProviderFinder.getOAuthProvider(provider)).thenReturn(mockOAuthProvider);
         when(mockOAuthProvider.getAccessToken(oauthCode)).thenReturn(accessToken);
-        when(mockOAuthProvider.getUserInfo(accessToken)).thenReturn(email);
+        when(mockOAuthProvider.getUserInfo(accessToken)).thenReturn(new UserInfoDto(providerId, email));
 
         User existingUser = User.builder()
+                .providerId(providerId)
                 .email(email)
                 .name(name)
                 .socialType(socialType)
@@ -94,7 +97,7 @@ class AuthServiceTest extends ServiceTest {
         User spyUser = spy(existingUser);
         when(spyUser.getId()).thenReturn(userId);
 
-        when(userRetriever.findByEmailAndSocialType(email, socialType)).thenReturn(spyUser);
+        when(userRetriever.findByProviderId(providerId)).thenReturn(spyUser);
 
         doReturn(new UserTokenDto(accessToken, refreshToken)).when(jwtTokenProvider).createLoginToken(anyLong());
 
@@ -146,8 +149,8 @@ class AuthServiceTest extends ServiceTest {
     void 회원탈퇴_성공() {
         // given
         doNothing().when(refreshTokenRepository).deleteById(refreshToken);
-        doNothing().when(subscribeService).deleteByUserId(userId);
-        doNothing().when(notificationService).deleteByUserId(userId);
+        doNothing().when(subscribeRemover).deleteByUserId(userId);
+        doNothing().when(userNotificationRemover).deleteByUserId(userId);
         doNothing().when(userService).deleteByUserId(userId);
 
         // when
@@ -155,8 +158,8 @@ class AuthServiceTest extends ServiceTest {
 
         // then
         verify(refreshTokenRepository, times(1)).deleteById(refreshToken);
-        verify(subscribeService, times(1)).deleteByUserId(userId);
-        verify(notificationService, times(1)).deleteByUserId(userId);
+        verify(subscribeRemover, times(1)).deleteByUserId(userId);
+        verify(userNotificationRemover, times(1)).deleteByUserId(userId);
         verify(userService, times(1)).deleteByUserId(userId);
     }
 }

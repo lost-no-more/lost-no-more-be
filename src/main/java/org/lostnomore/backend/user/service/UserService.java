@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRemover userRemover;
-    public User register(String email, SocialType socialType) {
+
+    public User register(String providerId, String email, SocialType socialType) {
         return User.builder()
+                .providerId(providerId)
                 .email(email)
                 .name(getName(email))
                 .socialType(socialType)

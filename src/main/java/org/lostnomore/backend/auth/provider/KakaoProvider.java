@@ -4,6 +4,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.lostnomore.backend.auth.dto.UserInfoDto;
 import org.lostnomore.backend.auth.dto.response.AccessTokenDto;
 import org.lostnomore.backend.auth.dto.response.KakaoUserDto;
 import org.lostnomore.backend.global.exception.BusinessException;
@@ -23,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class KakaoProvider implements OAuthProvider{
 
     @Value("${oauth2.kakao.token-url}")
@@ -30,6 +33,9 @@ public class KakaoProvider implements OAuthProvider{
 
     @Value("${oauth2.kakao.user-info-url}")
     private String KAKAO_USER_INFO_URL;
+
+    @Value("${oauth2.kakao.unlink-url}")
+    private String KAKAO_UNLINK_URL;
 
     @Value("${oauth2.kakao.code-url}")
     private String KAKAO_CODE_URL;
@@ -39,6 +45,9 @@ public class KakaoProvider implements OAuthProvider{
 
     @Value("${oauth2.kakao.client-secret}")
     private String KAKAO_CLIENT_SECRET;
+
+    @Value("${oauth2.kakao.admin-key}")
+    private String KAKAO_ADMIN_KEY;
 
     @Value("${oauth2.kakao.redirect-url}")
     private String KAKAO_LOGIN_REDIRECT_URL;
@@ -86,7 +95,12 @@ public class KakaoProvider implements OAuthProvider{
     }
 
     @Override
-    public String getUserInfo(String accessToken) {
+    public void unLink() {
+
+    }
+
+    @Override
+    public UserInfoDto getUserInfo(String accessToken) {
         try {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -99,7 +113,8 @@ public class KakaoProvider implements OAuthProvider{
                     request,
                     KakaoUserDto.class
             );
-            return Objects.requireNonNull(response.getBody()).getKakaoAccount().email();
+            KakaoUserDto kakaoUserDto = Objects.requireNonNull(response.getBody());
+            return new UserInfoDto(String.valueOf(kakaoUserDto.getId()), kakaoUserDto.getKakaoAccount().email());
         } catch (HttpClientErrorException e) {
             throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
         } catch (HttpServerErrorException | NullPointerException e) {

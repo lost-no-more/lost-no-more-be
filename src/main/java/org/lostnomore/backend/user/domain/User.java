@@ -24,6 +24,9 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
+    @Column(name = "provider_id", nullable = false, unique = true)
+    private String providerId;
+
     @Column(name = "email", nullable = false)
     private String email;
 
@@ -35,7 +38,8 @@ public class User {
     private SocialType socialType;
 
     @Builder
-    public User(String email, String name, SocialType socialType) {
+    public User(String providerId, String email, String name, SocialType socialType) {
+        this.providerId = providerId;
         this.email = email;
         this.name = name;
         this.socialType = socialType;

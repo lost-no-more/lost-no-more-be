@@ -4,6 +4,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.lostnomore.backend.auth.dto.UserInfoDto;
 import org.lostnomore.backend.auth.dto.response.AccessTokenDto;
 import org.lostnomore.backend.auth.dto.response.GoogleUserDto;
 import org.lostnomore.backend.global.exception.BusinessException;
@@ -23,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class GoogleProvider implements OAuthProvider {
 
     @Value("${oauth2.google.token-url}")
@@ -86,7 +89,12 @@ public class GoogleProvider implements OAuthProvider {
     }
 
     @Override
-    public String getUserInfo(String accessToken) {
+    public void unLink() {
+
+    }
+
+    @Override
+    public UserInfoDto getUserInfo(String accessToken) {
         try {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -101,7 +109,10 @@ public class GoogleProvider implements OAuthProvider {
                     GoogleUserDto.class
             );
 
-            return Objects.requireNonNull(response.getBody()).getEmail();
+            GoogleUserDto googleUserDto = Objects.requireNonNull(response.getBody());
+            log.info("id:{}", googleUserDto.getId());
+            log.info("email:{}", googleUserDto.getEmail());
+            return new UserInfoDto(googleUserDto.getId(), googleUserDto.getEmail());
         } catch (HttpClientErrorException e) {
             throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
         } catch (HttpServerErrorException | NullPointerException e) {

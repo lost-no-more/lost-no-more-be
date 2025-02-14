@@ -58,9 +58,9 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success());
     }
 
-    @DeleteMapping("/withdraw")
-    public ResponseEntity<ResponseDto> withdraw(@LoginUser final Long userId,
-                                       @CookieValue("refresh-token") final String refreshToken) {
+    @DeleteMapping("/{provider}/withdraw")
+    public ResponseEntity<ResponseDto> withdraw(@PathVariable String provider, @LoginUser final Long userId,
+                                                @CookieValue("refresh-token") final String refreshToken) {
         authService.withdraw(userId, refreshToken);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success());
     }

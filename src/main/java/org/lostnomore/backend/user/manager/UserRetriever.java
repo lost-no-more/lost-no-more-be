@@ -12,8 +12,8 @@ public class UserRetriever {
 
     private final UserRepository userRepository;
 
-    public User findByEmailAndSocialType(String email, SocialType socialType) {
-        return userRepository.findByEmailAndSocialType(email, socialType)
+    public User findByProviderId(String providerId) {
+        return userRepository.findByProviderId(providerId)
                 .orElse(null);
     }
 }

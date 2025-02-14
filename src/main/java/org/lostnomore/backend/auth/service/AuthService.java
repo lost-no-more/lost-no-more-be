@@ -3,6 +3,7 @@ package org.lostnomore.backend.auth.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lostnomore.backend.auth.domain.RefreshToken;
+import org.lostnomore.backend.auth.dto.UserInfoDto;
 import org.lostnomore.backend.auth.dto.UserTokenDto;
 import org.lostnomore.backend.auth.provider.JwtTokenProvider;
 import org.lostnomore.backend.auth.provider.OAuthProviderFinder;
@@ -10,8 +11,8 @@ import org.lostnomore.backend.auth.repository.RefreshTokenRepository;
 import org.lostnomore.backend.auth.util.BearerAuthorizationExtractor;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.AuthErrorCode;
-import org.lostnomore.backend.notification.service.NotificationService;
-import org.lostnomore.backend.subscribe.service.SubscribeService;
+import org.lostnomore.backend.notification.manager.UserNotificationRemover;
+import org.lostnomore.backend.subscribe.manager.SubscribeRemover;
 import org.lostnomore.backend.user.domain.SocialType;
 import org.lostnomore.backend.user.domain.User;
 import org.lostnomore.backend.user.manager.UserCreator;
@@ -32,8 +33,8 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final BearerAuthorizationExtractor bearerExtractor;
-    private final SubscribeService subscribeService;
-    private final NotificationService notificationService;
+    private final SubscribeRemover subscribeRemover;
+    private final UserNotificationRemover userNotificationRemover;
 
     public String getCodeLink(String provider) {
         return oAuthProviderFinder.getOAuthProvider(provider).getCodeUrl();
@@ -42,14 +43,15 @@ public class AuthService {
     @Transactional
     public UserTokenDto oauthLogin(String provider, String code) {
         String oauthAccessToken = oAuthProviderFinder.getOAuthProvider(provider).getAccessToken(code);
-        String email = oAuthProviderFinder.getOAuthProvider(provider).getUserInfo(oauthAccessToken);
+        UserInfoDto userInfo = oAuthProviderFinder.getOAuthProvider(provider).getUserInfo(oauthAccessToken);
+
         SocialType socialType = SocialType.valueOf(provider.toUpperCase());
 
         User user;
-        user = userRetriever.findByEmailAndSocialType(email, socialType);
+        user = userRetriever.findByProviderId(userInfo.getProviderId());
 
         if (user == null) {
-            user = userService.register(email, socialType);
+            user = userService.register(userInfo.getProviderId(), userInfo.getEmail(), socialType);
             userCreator.save(user);
         }
 
@@ -93,8 +95,8 @@ public class AuthService {
     public void withdraw(Long userId, String refreshToken) {
         refreshTokenRepository.deleteById(refreshToken);
 
-        subscribeService.deleteByUserId(userId);
-        notificationService.deleteByUserId(userId);
+        subscribeRemover.deleteByUserId(userId);
+        userNotificationRemover.deleteByUserId(userId);
         userService.deleteByUserId(userId);
     }
 }
