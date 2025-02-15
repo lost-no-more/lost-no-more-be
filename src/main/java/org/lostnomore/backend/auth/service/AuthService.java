@@ -1,7 +1,6 @@
 package org.lostnomore.backend.auth.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.lostnomore.backend.auth.domain.RefreshToken;
 import org.lostnomore.backend.auth.dto.UserInfoDto;
 import org.lostnomore.backend.auth.dto.UserTokenDto;
@@ -16,13 +15,13 @@ import org.lostnomore.backend.subscribe.manager.SubscribeRemover;
 import org.lostnomore.backend.user.domain.SocialType;
 import org.lostnomore.backend.user.domain.User;
 import org.lostnomore.backend.user.manager.UserCreator;
+import org.lostnomore.backend.user.manager.UserRemover;
 import org.lostnomore.backend.user.manager.UserRetriever;
 import org.lostnomore.backend.user.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class AuthService {
 
@@ -35,6 +34,7 @@ public class AuthService {
     private final BearerAuthorizationExtractor bearerExtractor;
     private final SubscribeRemover subscribeRemover;
     private final UserNotificationRemover userNotificationRemover;
+    private final UserRemover userRemover;
 
     public String getCodeLink(String provider) {
         return oAuthProviderFinder.getOAuthProvider(provider).getCodeUrl();
@@ -92,11 +92,15 @@ public class AuthService {
     }
 
     @Transactional
-    public void withdraw(Long userId, String refreshToken) {
+    public void withdraw(String provider, String code, Long userId, String refreshToken) {
+
+        String providerId = userRetriever.findByUserId(userId).getProviderId();
+        oAuthProviderFinder.getOAuthProvider(provider).unLink(providerId, code);
+
         refreshTokenRepository.deleteById(refreshToken);
 
         subscribeRemover.deleteByUserId(userId);
         userNotificationRemover.deleteByUserId(userId);
-        userService.deleteByUserId(userId);
+        userRemover.deleteByUserId(userId);
     }
 }
