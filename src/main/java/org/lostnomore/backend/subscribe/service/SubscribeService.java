@@ -1,6 +1,7 @@
 package org.lostnomore.backend.subscribe.service;
 
 import lombok.RequiredArgsConstructor;
+import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.SubscribeErrorCode;
 import org.lostnomore.backend.item.domain.Category;
@@ -13,6 +14,7 @@ import org.lostnomore.backend.subscribe.domain.Subscribe;
 import org.lostnomore.backend.subscribe.dto.request.SubscribeCreateDto;
 import org.lostnomore.backend.subscribe.dto.response.RecentItemsDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
+import org.lostnomore.backend.subscribe.dto.response.SubscribesDto;
 import org.lostnomore.backend.subscribe.manager.SubscribeCreator;
 import org.lostnomore.backend.subscribe.manager.SubscribeRetriever;
 import org.lostnomore.backend.user.domain.User;
@@ -130,5 +132,9 @@ public class SubscribeService {
         } catch (DataIntegrityViolationException e) {
             throw new BusinessException(SubscribeErrorCode.SUBSCRIBE_DUPLICATE);
         }
+    }
+
+    public SubscribesDto getSubscribes(final Long userId) {
+        return SubscribesDto.from(subscribeRetriever.findByUserId(userId));
     }
 }

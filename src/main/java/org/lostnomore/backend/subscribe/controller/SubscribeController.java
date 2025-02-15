@@ -6,6 +6,7 @@ import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.subscribe.dto.request.SubscribeCreateDto;
 import org.lostnomore.backend.subscribe.dto.response.RecentItemsDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
+import org.lostnomore.backend.subscribe.dto.response.SubscribesDto;
 import org.lostnomore.backend.subscribe.service.SubscribeService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -50,5 +51,12 @@ public class SubscribeController {
     ) {
         subscribeService.createSubscribe(userId, subscribeCreateDto);
         return ResponseEntity.ok().body(ResponseDto.success());
+    }
+
+    @GetMapping("/subscribe")
+    public ResponseEntity<ResponseDto<SubscribesDto>> getSubscribes (
+            @LoginUser final Long userId
+    ) {
+        return ResponseEntity.ok().body(ResponseDto.success(subscribeService.getSubscribes(userId)));
     }
 }
