@@ -28,13 +28,6 @@ public class LostItemController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(lostItemService.getItemsCount()));
     }
 
-    @GetMapping("items/recent")
-    public ResponseEntity<ResponseDto<RecentItemsDto>> getRecentItems (
-            final Long userId
-    ) {
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(lostItemService.getRecentItems(userId)));
-    }
-
     @PostMapping("/items")
     public ResponseEntity<ResponseDto<Void>> saveLostItem(
             @RequestBody final LostItemCreateDto request
@@ -52,7 +45,7 @@ public class LostItemController {
             @RequestParam Double bottom_right_lat,
             @RequestParam Double bottom_right_lon,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer category_id,
+            @RequestParam(required = false) Long category_id,
             @RequestParam(required = false) String region
     ) {
         return ResponseEntity.ok(ResponseDto.success(lostItemService.searchLostItems(

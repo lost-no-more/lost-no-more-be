@@ -85,7 +85,7 @@ class LostItemServiceTest {
         LocalDate startDate = LocalDate.of(2024, 2, 1);
         LocalDate endDate = LocalDate.of(2024, 2, 10);
 
-        when(lostItemSearchService.searchLostItems(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(lostItemSearchService.searchLostItems(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(mock(SearchHits.class)); // 그냥 빈 Mock 객체 반환
 
         // when

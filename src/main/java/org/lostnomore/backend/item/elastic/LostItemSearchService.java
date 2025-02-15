@@ -2,10 +2,13 @@ package org.lostnomore.backend.item.elastic;
 
 import co.elastic.clients.elasticsearch._types.GeoBounds;
 import co.elastic.clients.elasticsearch._types.GeoLocation;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
-import co.elastic.clients.json.JsonData;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -31,19 +34,22 @@ public class LostItemSearchService {
             Double bottomRightLat,
             Double bottomRightLon,
             String keyword,
-            Integer categoryId,
-            String region
+            Long categoryId,
+            String region,
+            Integer size
     ) {
 
         List<Query> mustQueries = new ArrayList<>();
         List<Query> shouldQueries = new ArrayList<>();
 
         // 날짜 범위
-        RangeQuery dateRangeQuery = RangeQuery.of(r -> r
-                .field("date")
-                .gte(JsonData.of(dateStart.toString()))
-                .lte(JsonData.of(dateEnd.toString()))
-        );
+        RangeQuery dateRangeQuery = new RangeQuery.Builder()
+                .date(d -> d
+                        .field("date")
+                        .gte(dateStart.toString())
+                        .lte(dateEnd.toString())
+                )
+                .build();
         mustQueries.add(dateRangeQuery._toQuery());
 
         // 키워드 검색
@@ -85,20 +91,22 @@ public class LostItemSearchService {
         }
 
         // 위치 필터
-        GeoBoundingBoxQuery geoQuery = GeoBoundingBoxQuery.of(g -> g
-                .field("location")
-                .boundingBox(
-                        GeoBounds.of(outer -> outer.tlbr(b -> b
-                                .topLeft(GeoLocation.of(loc ->
-                                        loc.text(topLeftLat + "," + topLeftLon)
-                                ))
-                                .bottomRight(GeoLocation.of(loc ->
-                                        loc.text(bottomRightLat + "," + bottomRightLon)
-                                ))
-                        ))
-                )
-        );
-        mustQueries.add(geoQuery._toQuery());
+        if (topLeftLat != null && topLeftLon != null && bottomRightLat != null && bottomRightLon != null) {
+            GeoBoundingBoxQuery geoQuery = GeoBoundingBoxQuery.of(g -> g
+                    .field("location")
+                    .boundingBox(
+                            GeoBounds.of(outer -> outer.tlbr(b -> b
+                                    .topLeft(GeoLocation.of(loc ->
+                                            loc.text(topLeftLat + "," + topLeftLon)
+                                    ))
+                                    .bottomRight(GeoLocation.of(loc ->
+                                            loc.text(bottomRightLat + "," + bottomRightLon)
+                                    ))
+                            ))
+                    )
+            );
+            mustQueries.add(geoQuery._toQuery());
+        }
 
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder()
                 .must(mustQueries); // 필수 조건 추가
@@ -110,10 +118,24 @@ public class LostItemSearchService {
 
         Query boolQuery = boolQueryBuilder.build()._toQuery();
 
+        List<SortOptions> sortOptions = List.of(
+                SortOptions.of(s -> s.field(f -> f.field("date").order(SortOrder.Desc))),
+                SortOptions.of(s -> s.field(f -> f.field("id").order(SortOrder.Desc)))
+        );
+
         NativeQuery searchQuery = NativeQuery.builder()
                 .withQuery(boolQuery)
+                .withSort(sortOptions)
+                .withPageable(size != null ? PageRequest.of(0, size) : Pageable.unpaged())
                 .build();
 
         return elasticsearchOperations.search(searchQuery, LostItemDocument.class);
+    }
+
+    @Transactional(readOnly = true)
+    public SearchHits<LostItemDocument> searchLostItemsForSubscription(
+            LocalDate dateStart, LocalDate dateEnd,
+            String keyword, Long categoryId, String region, Integer size) {
+        return searchLostItems(dateStart, dateEnd, null, null, null, null, keyword, categoryId, region, size);
     }
 }

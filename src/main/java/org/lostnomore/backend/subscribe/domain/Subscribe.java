@@ -39,10 +39,14 @@ public class Subscribe extends BaseEntity {
     @Column(name = "keyword", nullable = false)
     private String keyword;
 
+    @Column(name = "region", nullable = false)
+    private String region;
+
     @Builder
-    public Subscribe(User user, Category category, String keyword) {
+    public Subscribe(User user, Category category, String keyword, String region) {
         this.user = user;
         this.category = category;
         this.keyword = keyword;
+        this.region = region;
     }
 }

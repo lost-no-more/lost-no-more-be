@@ -1,23 +1,18 @@
 package org.lostnomore.backend.item.service;
 
 import lombok.RequiredArgsConstructor;
-import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.item.domain.Category;
 import org.lostnomore.backend.item.domain.Location;
 import org.lostnomore.backend.item.domain.LostItem;
 import org.lostnomore.backend.item.dto.request.LostItemCreateDto;
-import org.lostnomore.backend.item.dto.request.LostItemIdsDto;
 import org.lostnomore.backend.item.dto.response.*;
 import org.lostnomore.backend.item.elastic.LostItemDocument;
 import org.lostnomore.backend.item.elastic.LostItemSearchRepository;
 import org.lostnomore.backend.item.elastic.LostItemSearchService;
 import org.lostnomore.backend.item.manager.*;
 import jakarta.persistence.Tuple;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,14 +39,6 @@ public class LostItemService {
         Long totalCount = stats.get(1, Long.class);
 
         return ItemsCountDto.of(todayCount.intValue(), totalCount.intValue());
-    }
-
-    @Transactional(readOnly = true)
-    public RecentItemsDto getRecentItems(final Long userId) {
-        Pageable pageable = PageRequest.of(0, 9);
-        List<LostItem> recentItems = lostItemRetriever.findRecentItemsByUserId(userId, pageable).getContent();
-
-        return RecentItemsDto.from(recentItems);
     }
 
     @Transactional
@@ -100,14 +87,14 @@ public class LostItemService {
             LocalDate dateStart, LocalDate dateEnd,
             Double topLeftLat, Double topLeftLon,
             Double bottomRightLat, Double bottomRightLon,
-            String keyword, Integer categoryId, String region
+            String keyword, Long categoryId, String region
     ) {
 
         SearchHits<LostItemDocument> lostItems = lostItemSearchService.searchLostItems(
                 dateStart, dateEnd,
                 topLeftLat, topLeftLon,
                 bottomRightLat, bottomRightLon,
-                keyword, categoryId, region
+                keyword, categoryId, region, null
         );
 
         return LostItemsSearchDto.from(lostItems);

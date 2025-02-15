@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,21 +28,22 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
     @Query("""
        SELECT l FROM LostItem l
        JOIN FETCH l.location
-       WHERE l.category IN (
-           SELECT s.category FROM Subscribe s WHERE s.user.id = :userId
-       )
-       ORDER BY l.createdDate DESC
+       JOIN FETCH l.category
+       WHERE l.id IN :ids
+       ORDER BY l.date DESC, l.id DESC
        """)
-    Page<LostItem> findRecentItemsByUserId(Long userId, Pageable pageable);
-
+    List<LostItem> findByIdIn(List<Long> ids);
 
     @Query("""
        SELECT l FROM LostItem l
        JOIN FETCH l.location
        JOIN FETCH l.category
        WHERE l.id IN :ids
+       AND (:cursorDate IS NULL OR (l.date < :cursorDate OR (l.date = :cursorDate AND l.id < :cursorId)))\s
+       ORDER BY l.date DESC, l.id DESC
+       LIMIT :size
        """)
-    List<LostItem> findByIdIn(List<Long> ids);
+    List<LostItem> findByIdInWithCursorPagination(List<Long> ids, LocalDate cursorDate, Long cursorId, int size);
 
     @Query("""
       SELECT l FROM LostItem l
