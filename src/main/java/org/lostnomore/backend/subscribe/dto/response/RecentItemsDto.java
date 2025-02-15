@@ -1,4 +1,4 @@
-package org.lostnomore.backend.item.dto.response;
+package org.lostnomore.backend.subscribe.dto.response;
 
 import org.lostnomore.backend.item.domain.LostItem;
 
