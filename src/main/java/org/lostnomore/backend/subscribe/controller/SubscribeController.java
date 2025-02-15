@@ -3,15 +3,14 @@ package org.lostnomore.backend.subscribe.controller;
 import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.global.LoginUser;
 import org.lostnomore.backend.global.dto.ResponseDto;
+import org.lostnomore.backend.subscribe.dto.request.SubscribeCreateDto;
 import org.lostnomore.backend.subscribe.dto.response.RecentItemsDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
 import org.lostnomore.backend.subscribe.service.SubscribeService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
@@ -42,5 +41,14 @@ public class SubscribeController {
                 userId, date_start, date_end, keyword,
                 cursorDate, cursorId, size
         )));
+    }
+
+    @PostMapping("/subscribe")
+    public ResponseEntity<ResponseDto<Void>> createSubscribe(
+            @LoginUser final Long userId,
+            @RequestBody SubscribeCreateDto subscribeCreateDto
+    ) {
+        subscribeService.createSubscribe(userId, subscribeCreateDto);
+        return ResponseEntity.ok().body(ResponseDto.success());
     }
 }

@@ -1,14 +1,23 @@
 package org.lostnomore.backend.subscribe.service;
 
 import lombok.RequiredArgsConstructor;
+import org.lostnomore.backend.global.exception.BusinessException;
+import org.lostnomore.backend.global.exception.code.SubscribeErrorCode;
+import org.lostnomore.backend.item.domain.Category;
 import org.lostnomore.backend.item.domain.LostItem;
 import org.lostnomore.backend.item.elastic.LostItemDocument;
 import org.lostnomore.backend.item.elastic.LostItemSearchService;
+import org.lostnomore.backend.item.manager.CategoryRetriever;
 import org.lostnomore.backend.item.manager.LostItemRetriever;
 import org.lostnomore.backend.subscribe.domain.Subscribe;
+import org.lostnomore.backend.subscribe.dto.request.SubscribeCreateDto;
 import org.lostnomore.backend.subscribe.dto.response.RecentItemsDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
+import org.lostnomore.backend.subscribe.manager.SubscribeCreator;
 import org.lostnomore.backend.subscribe.manager.SubscribeRetriever;
+import org.lostnomore.backend.user.domain.User;
+import org.lostnomore.backend.user.manager.UserRetriever;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +33,9 @@ public class SubscribeService {
     private final SubscribeRetriever subscribeRetriever;
     private final LostItemSearchService lostItemSearchService;
     private final LostItemRetriever lostItemRetriever;
+    private final UserRetriever userRetriever;
+    private final CategoryRetriever categoryRetriever;
+    private final SubscribeCreator subscribeCreator;
 
     @Transactional(readOnly = true)
     public RecentItemsDto getRecentItems(final Long userId) {
@@ -97,5 +109,26 @@ public class SubscribeService {
         }
 
         return lostItemIds;
+    }
+
+    public void createSubscribe(
+            final Long userId,
+            final SubscribeCreateDto subscribeCreateDto
+    ) {
+       User user = userRetriever.findById(userId);
+        Category category = categoryRetriever.findByName(subscribeCreateDto.category());
+
+       Subscribe subscribe = Subscribe.builder()
+               .user(user)
+               .keyword(subscribeCreateDto.keyword())
+               .category(category)
+               .region(subscribeCreateDto.region())
+               .build();
+
+        try {
+            subscribeCreator.save(subscribe);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(SubscribeErrorCode.SUBSCRIBE_DUPLICATE);
+        }
     }
 }
