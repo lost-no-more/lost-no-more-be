@@ -55,7 +55,7 @@ public class AuthController {
     public ResponseEntity<ResponseDto> logout(@LoginUser final Long userId,
                                        @CookieValue("refresh-token") final String refreshToken) {
         authService.logout(refreshToken);
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ResponseDto.success());
     }
 
     @DeleteMapping("/{provider}/withdraw")
