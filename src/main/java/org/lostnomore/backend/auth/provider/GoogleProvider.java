@@ -4,7 +4,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.lostnomore.backend.auth.dto.UserInfoDto;
 import org.lostnomore.backend.auth.dto.response.AccessTokenDto;
 import org.lostnomore.backend.auth.dto.response.GoogleUserDto;
@@ -25,7 +24,6 @@ import org.springframework.web.client.RestTemplate;
 
 @RequiredArgsConstructor
 @Component
-@Slf4j
 public class GoogleProvider implements OAuthProvider {
 
     @Value("${oauth2.google.token-url}")
@@ -45,6 +43,9 @@ public class GoogleProvider implements OAuthProvider {
 
     @Value("${oauth2.google.user-info-url}")
     private String GOOGLE_USER_INFO_URL;
+
+    @Value("${oauth2.google.unlink-url}")
+    private String GOOGLE_UNLINK_URL;
 
     @Value("${oauth2.google.scope}")
     private String GOOGLE_SCOPE;
@@ -89,8 +90,23 @@ public class GoogleProvider implements OAuthProvider {
     }
 
     @Override
-    public void unLink() {
+    public void unLink(String providerId,String code) {
+        try {
+            String accessToken = getAccessToken(code);
+            final MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+            params.add("token", accessToken);
 
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            final HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params, headers);
+
+            restTemplate.postForLocation(GOOGLE_UNLINK_URL, request);
+        } catch (HttpClientErrorException e) {
+            throw new BusinessException(AuthErrorCode.INVALID_CODE);
+        } catch (HttpServerErrorException | NullPointerException e) {
+            throw new BusinessException(AuthErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
@@ -110,8 +126,6 @@ public class GoogleProvider implements OAuthProvider {
             );
 
             GoogleUserDto googleUserDto = Objects.requireNonNull(response.getBody());
-            log.info("id:{}", googleUserDto.getId());
-            log.info("email:{}", googleUserDto.getEmail());
             return new UserInfoDto(googleUserDto.getId(), googleUserDto.getEmail());
         } catch (HttpClientErrorException e) {
             throw new BusinessException(AuthErrorCode.INVALID_TOKEN);

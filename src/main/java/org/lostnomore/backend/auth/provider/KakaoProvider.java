@@ -4,7 +4,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.lostnomore.backend.auth.dto.UserInfoDto;
 import org.lostnomore.backend.auth.dto.response.AccessTokenDto;
 import org.lostnomore.backend.auth.dto.response.KakaoUserDto;
@@ -25,7 +24,6 @@ import org.springframework.web.client.RestTemplate;
 
 @RequiredArgsConstructor
 @Component
-@Slf4j
 public class KakaoProvider implements OAuthProvider{
 
     @Value("${oauth2.kakao.token-url}")
@@ -95,8 +93,24 @@ public class KakaoProvider implements OAuthProvider{
     }
 
     @Override
-    public void unLink() {
+    public void unLink(String providerId,String code) {
+        try {
+            final MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+            params.add("target_id_type", "user_id");
+            params.add("target_id", Long.parseLong(providerId));
 
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "KakaoAK " + KAKAO_ADMIN_KEY);
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            final HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params, headers);
+
+            restTemplate.postForLocation(KAKAO_UNLINK_URL, request);
+        } catch (HttpClientErrorException e) {
+            throw new BusinessException(AuthErrorCode.INVALID_CODE);
+        } catch (HttpServerErrorException | NullPointerException e) {
+            throw new BusinessException(AuthErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override

@@ -10,5 +10,5 @@ public interface OAuthProvider {
 
     String getAccessToken(final String code);
 
-    void unLink();
+    void unLink(final String providerId, final String code);
 }
