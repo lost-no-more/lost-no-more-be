@@ -9,6 +9,7 @@ import org.lostnomore.backend.auth.dto.response.AccessTokenDto;
 import org.lostnomore.backend.auth.dto.response.GoogleUserDto;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.AuthErrorCode;
+import org.lostnomore.backend.global.exception.code.BusinessErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -90,8 +91,11 @@ public class GoogleProvider implements OAuthProvider {
     }
 
     @Override
-    public void unLink(String providerId,String code) {
+    public void unLink(String providerId, String code) {
         try {
+            if (code == null) {
+                throw new BusinessException(BusinessErrorCode.MISSING_REQUIRED_PARAMETER);
+            }
             String accessToken = getAccessToken(code);
             final MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
             params.add("token", accessToken);
