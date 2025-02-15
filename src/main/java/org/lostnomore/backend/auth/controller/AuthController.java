@@ -59,9 +59,10 @@ public class AuthController {
     }
 
     @DeleteMapping("/{provider}/withdraw")
-    public ResponseEntity<ResponseDto> withdraw(@PathVariable String provider, @LoginUser final Long userId,
+    public ResponseEntity<ResponseDto> withdraw(@PathVariable String provider, @RequestParam(required = false) String code,
+                                                @LoginUser final Long userId,
                                                 @CookieValue("refresh-token") final String refreshToken) {
-        authService.withdraw(userId, refreshToken);
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success());
+        authService.withdraw(provider, code, userId, refreshToken);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ResponseDto.success());
     }
 }
