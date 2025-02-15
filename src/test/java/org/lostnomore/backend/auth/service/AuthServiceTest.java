@@ -31,6 +31,7 @@ import org.lostnomore.backend.subscribe.manager.SubscribeRemover;
 import org.lostnomore.backend.user.domain.SocialType;
 import org.lostnomore.backend.user.domain.User;
 import org.lostnomore.backend.user.manager.UserCreator;
+import org.lostnomore.backend.user.manager.UserRemover;
 import org.lostnomore.backend.user.manager.UserRetriever;
 import org.lostnomore.backend.user.service.UserService;
 import org.mockito.InjectMocks;
@@ -45,6 +46,9 @@ class AuthServiceTest extends ServiceTest {
 
     @Mock
     private UserNotificationRemover userNotificationRemover;
+
+    @Mock
+    private UserRemover userRemover;
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
@@ -74,7 +78,7 @@ class AuthServiceTest extends ServiceTest {
     private final String accessToken = "access-token";
     private final String provider = "google";
     private final String oauthCode = "oauth-code";
-    private final Long providerId = 1L;
+    private final String providerId = "1";
     private final String email = "test@example.com";
     private final String name = "test_name";
     private final Long userId = 1L;
@@ -148,18 +152,30 @@ class AuthServiceTest extends ServiceTest {
     @Test
     void 회원탈퇴_성공() {
         // given
+        String provider = "kakao";
+        String providerId = "test_provider_id";
+        User mockUser = mock(User.class);
+        OAuthProvider mockOAuthProvider = mock(OAuthProvider.class);
+
+        when(mockUser.getProviderId()).thenReturn(providerId);
+        when(userRetriever.findByUserId(userId)).thenReturn(mockUser);
+        when(oAuthProviderFinder.getOAuthProvider(provider)).thenReturn(mockOAuthProvider);
+
+        doNothing().when(mockOAuthProvider).unLink(providerId, "test_code");
         doNothing().when(refreshTokenRepository).deleteById(refreshToken);
         doNothing().when(subscribeRemover).deleteByUserId(userId);
         doNothing().when(userNotificationRemover).deleteByUserId(userId);
-        doNothing().when(userService).deleteByUserId(userId);
+        doNothing().when(userRemover).deleteByUserId(userId);
 
         // when
-        authService.withdraw(userId, refreshToken);
+        authService.withdraw(provider, "test_code", userId, refreshToken);
 
         // then
+        verify(oAuthProviderFinder, times(1)).getOAuthProvider(provider);
+        verify(mockOAuthProvider, times(1)).unLink(providerId, "test_code");
         verify(refreshTokenRepository, times(1)).deleteById(refreshToken);
         verify(subscribeRemover, times(1)).deleteByUserId(userId);
         verify(userNotificationRemover, times(1)).deleteByUserId(userId);
-        verify(userService, times(1)).deleteByUserId(userId);
+        verify(userRemover, times(1)).deleteByUserId(userId);
     }
 }
