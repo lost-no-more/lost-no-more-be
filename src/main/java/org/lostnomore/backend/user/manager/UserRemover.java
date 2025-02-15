@@ -11,6 +11,6 @@ public class UserRemover {
     private final UserRepository userRepository;
 
     public void deleteByUserId(Long userId) {
-        userRepository.deleteByUserId(userId);
+        userRepository.deleteById(userId);
     }
 }
