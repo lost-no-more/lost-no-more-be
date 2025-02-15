@@ -62,7 +62,7 @@ public class LostItemController {
     public ResponseEntity<ResponseDto<LostItemsListDto>> searchLostItemsList(
             @RequestBody final LostItemIdsDto lostItemIdsDto
     ) {
-        return ResponseEntity.ok().body(ResponseDto.success(lostItemService.searchLostItemsList(lostItemIdsDto.ids())));
+        return ResponseEntity.ok().body(ResponseDto.success(lostItemService.searchLostItemsList(lostItemIdsDto.lostItemIds())));
     }
 
     @GetMapping("/items/search/{lostItemId}")
