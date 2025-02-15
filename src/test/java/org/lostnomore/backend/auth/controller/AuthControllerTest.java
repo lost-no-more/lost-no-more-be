@@ -142,7 +142,8 @@ class AuthControllerTest extends ControllerTest {
     @Test
     void 회원_탈퇴시_쿠키없으면_오류() throws Exception {
         // when & then
-        mockMvc.perform(delete("/auth/withdraw"))
+        mockMvc.perform(delete("/auth/google/withdraw")
+                        .param("code", "test_code"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.isSuccess").value(false))
                 .andExpect(jsonPath("$.error.code").value(BusinessErrorCode.MISSING_REQUIRED_COOKIE.getHttpStatus().value()))
