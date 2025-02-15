@@ -1,7 +1,5 @@
 package org.lostnomore.backend.subscribe.repository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,9 +37,6 @@ class SubscribeRepositoryTest extends RepositoryTest {
 
     @Autowired
     private LocationRepository locationRepository;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     private User testUser;
     private Category testCategory;
@@ -179,33 +174,4 @@ class SubscribeRepositoryTest extends RepositoryTest {
         Subscribe updatedSubscribe = subscribeRepository.findById(savedSubscribe.getId()).orElseThrow();
         assertThat(updatedSubscribe.getKeyword()).isEqualTo("아이패드");
     }
-
-
-//    @Test
-//    @DisplayName("구독 정보를 수정할 수 있다.")
-//    void updateSubscribeTest() {
-//        // Given
-//        Subscribe subscribe = Subscribe.builder()
-//                .user(testUser)
-//                .keyword("태블릿")
-//                .category(testCategory)
-//                .region(testLocation.getName())
-//                .build();
-//
-//        Subscribe savedSubscribe = subscribeRepository.save(subscribe);
-//        entityManager.flush();
-//        entityManager.clear();
-//
-//        // When
-//        Subscribe foundSubscribe = subscribeRepository.findById(savedSubscribe.getId()).orElseThrow();
-//        foundSubscribe.updateKeyword("스마트폰");
-//        subscribeRepository.save(foundSubscribe);
-//        entityManager.flush();
-//        entityManager.clear();
-//
-//        // Then
-//        Subscribe updatedSubscribe = subscribeRepository.findById(savedSubscribe.getId()).orElseThrow();
-//        assertThat(updatedSubscribe.getKeyword()).isEqualTo("스마트폰");
-//    }
-
 }
