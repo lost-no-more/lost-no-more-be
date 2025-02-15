@@ -44,4 +44,14 @@ public class Subscribe extends BaseEntity {
         this.keyword = keyword;
         this.region = region;
     }
+
+    public void updateSubscribe(
+            String keyword,
+            Category category,
+            String region
+    ) {
+        this.keyword = keyword;
+        this.category = category;
+        this.region = region;
+    }
 }

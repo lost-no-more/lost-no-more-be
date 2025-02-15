@@ -63,9 +63,19 @@ public class SubscribeController {
     @DeleteMapping("/subscribe/{subscribeId}")
     public ResponseEntity<ResponseDto<Void>> deleteSubscribe (
             @LoginUser final Long userId,
-            @PathVariable Long subscribeId
+            @PathVariable final Long subscribeId
     ) {
         subscribeService.deleteSubscribe(userId, subscribeId);
+        return ResponseEntity.ok().body(ResponseDto.success());
+    }
+
+    @PutMapping("/subscribe/{subscribeId}")
+    public ResponseEntity<ResponseDto<Void>> updateSubscribe (
+            @LoginUser final Long userId,
+            @PathVariable final Long subscribeId,
+            @RequestBody final SubscribeCreateDto subscribeCreateDto
+    ) {
+        subscribeService.updateSubscribe(userId, subscribeId, subscribeCreateDto);
         return ResponseEntity.ok().body(ResponseDto.success());
     }
 }

@@ -16,6 +16,7 @@ import org.lostnomore.backend.subscribe.dto.response.RecentItemsDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribesDto;
 import org.lostnomore.backend.subscribe.manager.SubscribeCreator;
+import org.lostnomore.backend.subscribe.manager.SubscribeEditor;
 import org.lostnomore.backend.subscribe.manager.SubscribeRemover;
 import org.lostnomore.backend.subscribe.manager.SubscribeRetriever;
 import org.lostnomore.backend.user.domain.User;
@@ -40,6 +41,7 @@ public class SubscribeService {
     private final CategoryRetriever categoryRetriever;
     private final SubscribeCreator subscribeCreator;
     private final SubscribeRemover subscribeRemover;
+    private final SubscribeEditor subscribeEditor;
 
     @Transactional(readOnly = true)
     public RecentItemsDto getRecentItems(final Long userId) {
@@ -115,6 +117,7 @@ public class SubscribeService {
         return lostItemIds;
     }
 
+    @Transactional
     public void createSubscribe(
             final Long userId,
             final SubscribeCreateDto subscribeCreateDto
@@ -136,20 +139,38 @@ public class SubscribeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public SubscribesDto getSubscribes(final Long userId) {
         return SubscribesDto.from(subscribeRetriever.findByUserId(userId));
     }
 
+    @Transactional
     public void deleteSubscribe(
             final Long userId,
             final Long subscribeId
     ) {
         Subscribe subscribe = subscribeRetriever.findById(subscribeId);
+        validateSubscribeOwner(userId, subscribe);
 
+        subscribeRemover.deleteById(subscribeId);
+    }
+
+    @Transactional
+    public void updateSubscribe(
+            final Long userId,
+            final Long subscribeId,
+            final SubscribeCreateDto subscribeDto
+    ) {
+        Subscribe subscribe = subscribeRetriever.findById(subscribeId);
+        validateSubscribeOwner(userId, subscribe);
+
+        Category category = categoryRetriever.findByName(subscribeDto.category());
+        subscribeEditor.updateSubscribe(subscribe, subscribeDto.keyword(), category, subscribeDto.region());
+    }
+
+    private void validateSubscribeOwner(Long userId, Subscribe subscribe) {
         if (!subscribe.getUser().getId().equals(userId)) {
             throw new BusinessException(SubscribeErrorCode.SUBSCRIBE_FORBIDDEN);
         }
-
-        subscribeRemover.deleteById(subscribeId);
     }
 }
