@@ -3,12 +3,15 @@ package org.lostnomore.backend.subscribe.service;
 import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.global.exception.BusinessException;
+import org.lostnomore.backend.global.exception.code.LocationErrorCode;
 import org.lostnomore.backend.global.exception.code.SubscribeErrorCode;
 import org.lostnomore.backend.item.domain.Category;
+import org.lostnomore.backend.item.domain.Location;
 import org.lostnomore.backend.item.domain.LostItem;
 import org.lostnomore.backend.item.elastic.LostItemDocument;
 import org.lostnomore.backend.item.elastic.LostItemSearchService;
 import org.lostnomore.backend.item.manager.CategoryRetriever;
+import org.lostnomore.backend.item.manager.LocationRetriever;
 import org.lostnomore.backend.item.manager.LostItemRetriever;
 import org.lostnomore.backend.subscribe.domain.Subscribe;
 import org.lostnomore.backend.subscribe.dto.request.SubscribeCreateDto;
@@ -42,6 +45,7 @@ public class SubscribeService {
     private final SubscribeCreator subscribeCreator;
     private final SubscribeRemover subscribeRemover;
     private final SubscribeEditor subscribeEditor;
+    private final LocationRetriever locationRetriever;
 
     @Transactional(readOnly = true)
     public RecentItemsDto getRecentItems(final Long userId) {
@@ -123,7 +127,8 @@ public class SubscribeService {
             final SubscribeCreateDto subscribeCreateDto
     ) {
        User user = userRetriever.findById(userId);
-        Category category = categoryRetriever.findByName(subscribeCreateDto.category());
+       validateRegionExists(subscribeCreateDto.region());
+       Category category = categoryRetriever.findByName(subscribeCreateDto.category());
 
        Subscribe subscribe = Subscribe.builder()
                .user(user)
@@ -163,6 +168,7 @@ public class SubscribeService {
     ) {
         Subscribe subscribe = subscribeRetriever.findById(subscribeId);
         validateSubscribeOwner(userId, subscribe);
+        validateRegionExists(subscribeDto.region());
 
         Category category = categoryRetriever.findByName(subscribeDto.category());
         subscribeEditor.updateSubscribe(subscribe, subscribeDto.keyword(), category, subscribeDto.region());
@@ -171,6 +177,14 @@ public class SubscribeService {
     private void validateSubscribeOwner(Long userId, Subscribe subscribe) {
         if (!subscribe.getUser().getId().equals(userId)) {
             throw new BusinessException(SubscribeErrorCode.SUBSCRIBE_FORBIDDEN);
+        }
+    }
+
+    private void validateRegionExists(String region) {
+        List<Location> locations = locationRetriever.findByRegion(region);
+
+        if (locations.isEmpty()) {
+            throw new BusinessException(LocationErrorCode.LOCATION_REGION_NOT_FOUND);
         }
     }
 }
