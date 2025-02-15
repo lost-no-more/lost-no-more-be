@@ -16,6 +16,7 @@ import org.lostnomore.backend.subscribe.dto.response.RecentItemsDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribesDto;
 import org.lostnomore.backend.subscribe.manager.SubscribeCreator;
+import org.lostnomore.backend.subscribe.manager.SubscribeRemover;
 import org.lostnomore.backend.subscribe.manager.SubscribeRetriever;
 import org.lostnomore.backend.user.domain.User;
 import org.lostnomore.backend.user.manager.UserRetriever;
@@ -38,6 +39,7 @@ public class SubscribeService {
     private final UserRetriever userRetriever;
     private final CategoryRetriever categoryRetriever;
     private final SubscribeCreator subscribeCreator;
+    private final SubscribeRemover subscribeRemover;
 
     @Transactional(readOnly = true)
     public RecentItemsDto getRecentItems(final Long userId) {
@@ -136,5 +138,18 @@ public class SubscribeService {
 
     public SubscribesDto getSubscribes(final Long userId) {
         return SubscribesDto.from(subscribeRetriever.findByUserId(userId));
+    }
+
+    public void deleteSubscribe(
+            final Long userId,
+            final Long subscribeId
+    ) {
+        Subscribe subscribe = subscribeRetriever.findById(subscribeId);
+
+        if (!subscribe.getUser().getId().equals(userId)) {
+            throw new BusinessException(SubscribeErrorCode.SUBSCRIBE_FORBIDDEN);
+        }
+
+        subscribeRemover.deleteById(subscribeId);
     }
 }
