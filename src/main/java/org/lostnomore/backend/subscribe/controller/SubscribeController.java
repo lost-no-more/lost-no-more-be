@@ -1,6 +1,7 @@
 package org.lostnomore.backend.subscribe.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.lostnomore.backend.global.LoginUser;
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.subscribe.dto.response.RecentItemsDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
@@ -22,14 +23,14 @@ public class SubscribeController {
 
     @GetMapping("items/recent")
     public ResponseEntity<ResponseDto<RecentItemsDto>> getRecentItems (
-            final Long userId
+            @LoginUser final Long userId
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(subscribeService.getRecentItems(userId)));
     }
 
     @GetMapping("/subscribe/list")
     public ResponseEntity<ResponseDto<SubscribeListDto>> getSubscribeList(
-            final Long userId,
+            @LoginUser final Long userId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date_start,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date_end,
             @RequestParam(required = false) String keyword,
