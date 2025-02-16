@@ -6,10 +6,7 @@ import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.notification.dto.response.UserNotificationsDto;
 import org.lostnomore.backend.notification.service.NotificationService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,6 +27,15 @@ public class NotificationController {
             @PathVariable final Long alarmId
     ) {
         notificationService.readAlarm(userId, alarmId);
+        return ResponseEntity.ok().body(ResponseDto.success());
+    }
+
+    @DeleteMapping("/alarm/{alarmId}")
+    public ResponseEntity<ResponseDto<Void>> deleteAlarm(
+            @LoginUser final Long userId,
+            @PathVariable final Long alarmId
+    ) {
+        notificationService.deleteAlarm(userId, alarmId);
         return ResponseEntity.ok().body(ResponseDto.success());
     }
 }
