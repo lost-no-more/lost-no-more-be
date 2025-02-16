@@ -19,7 +19,7 @@ class UserServiceTest extends ServiceTest {
     @Test
     void 신규회원_가입시_이름_추출() {
         // given
-        User register = userService.register("test@exampl.com", SocialType.GOOGLE);
+        User register = userService.register("1", "test@exampl.com", SocialType.GOOGLE);
 
         // when & then
         assertThat(register.getName()).isEqualTo("test");

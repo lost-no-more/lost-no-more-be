@@ -1,6 +1,7 @@
 package org.lostnomore.backend.subscribe.service;
 
 import lombok.RequiredArgsConstructor;
+
 import org.lostnomore.backend.item.domain.LostItem;
 import org.lostnomore.backend.item.elastic.LostItemDocument;
 import org.lostnomore.backend.item.elastic.LostItemSearchService;
@@ -10,6 +11,7 @@ import org.lostnomore.backend.subscribe.dto.response.RecentItemsDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
 import org.lostnomore.backend.subscribe.manager.SubscribeRetriever;
 import org.springframework.data.elasticsearch.core.SearchHits;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class SubscribeService {
+
 
     private final SubscribeRetriever subscribeRetriever;
     private final LostItemSearchService lostItemSearchService;
@@ -98,4 +101,5 @@ public class SubscribeService {
 
         return lostItemIds;
     }
+
 }

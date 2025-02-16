@@ -4,10 +4,12 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.lostnomore.backend.auth.dto.UserInfoDto;
 import org.lostnomore.backend.auth.dto.response.AccessTokenDto;
 import org.lostnomore.backend.auth.dto.response.GoogleUserDto;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.AuthErrorCode;
+import org.lostnomore.backend.global.exception.code.BusinessErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -42,6 +44,9 @@ public class GoogleProvider implements OAuthProvider {
 
     @Value("${oauth2.google.user-info-url}")
     private String GOOGLE_USER_INFO_URL;
+
+    @Value("${oauth2.google.unlink-url}")
+    private String GOOGLE_UNLINK_URL;
 
     @Value("${oauth2.google.scope}")
     private String GOOGLE_SCOPE;
@@ -86,7 +91,30 @@ public class GoogleProvider implements OAuthProvider {
     }
 
     @Override
-    public String getUserInfo(String accessToken) {
+    public void unLink(String providerId, String code) {
+        try {
+            if (code == null) {
+                throw new BusinessException(BusinessErrorCode.MISSING_REQUIRED_PARAMETER);
+            }
+            String accessToken = getAccessToken(code);
+            final MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+            params.add("token", accessToken);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            final HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params, headers);
+
+            restTemplate.postForLocation(GOOGLE_UNLINK_URL, request);
+        } catch (HttpClientErrorException e) {
+            throw new BusinessException(AuthErrorCode.INVALID_CODE);
+        } catch (HttpServerErrorException | NullPointerException e) {
+            throw new BusinessException(AuthErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public UserInfoDto getUserInfo(String accessToken) {
         try {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -101,7 +129,8 @@ public class GoogleProvider implements OAuthProvider {
                     GoogleUserDto.class
             );
 
-            return Objects.requireNonNull(response.getBody()).getEmail();
+            GoogleUserDto googleUserDto = Objects.requireNonNull(response.getBody());
+            return new UserInfoDto(googleUserDto.getId(), googleUserDto.getEmail());
         } catch (HttpClientErrorException e) {
             throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
         } catch (HttpServerErrorException | NullPointerException e) {
