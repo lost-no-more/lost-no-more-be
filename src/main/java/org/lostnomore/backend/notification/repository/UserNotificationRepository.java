@@ -11,7 +11,8 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
 
     @Query("""
        SELECT un FROM UserNotification un
-       JOIN FETCH un.notification
+       JOIN FETCH un.notification n
+       JOIN FETCH n.category
        WHERE un.user.id = :userId
        """)
     List<UserNotification> findByUserId(Long userId);
