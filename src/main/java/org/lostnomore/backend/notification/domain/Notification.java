@@ -33,7 +33,7 @@ public class Notification extends BaseEntity {
     private Category category;
 
     @Column(name = "total_count", nullable = false)
-    private Long totalCount;
+    private int totalCount;
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
@@ -45,7 +45,7 @@ public class Notification extends BaseEntity {
     private String ids;
 
     @Builder
-    public Notification(Category category, Long totalCount, LocalDate date, String keyword, String ids) {
+    public Notification(Category category, int totalCount, LocalDate date, String keyword, String ids) {
         this.category = category;
         this.totalCount = totalCount;
         this.date = date;
