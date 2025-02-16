@@ -17,6 +17,7 @@ public class NotificationService {
     private final NotificationRetriever notificationRetriever;
     private final NotificationEditor notificationEditor;
 
+    @Transactional(readOnly = true)
     public UserNotificationsDto getAlarms(final Long userId) {
         return UserNotificationsDto.from(notificationRetriever.findByUserId(userId));
     }
