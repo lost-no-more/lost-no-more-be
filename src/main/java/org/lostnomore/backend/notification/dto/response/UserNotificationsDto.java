@@ -28,7 +28,7 @@ public record UserNotificationsDto(
     ) {
         public static UserNotificationDto from(UserNotification userNotification) {
             return new UserNotificationDto(
-                    userNotification.getNotification().getId(),
+                    userNotification.getId(),
                     userNotification.getNotification().getDate(),
                     userNotification.getNotification().getTotalCount(),
                     userNotification.getNotification().getKeyword(),
