@@ -10,8 +10,11 @@ public class SubscribeRemover {
 
     private final SubscribeRepository subscribeRepository;
 
-
     public void deleteById(final Long subscribeId) {
         subscribeRepository.deleteById(subscribeId);
+    }
+
+    public void deleteByUserId(Long userId) {
+        subscribeRepository.deleteByUserId(userId);
     }
 }

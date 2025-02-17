@@ -1,7 +1,6 @@
 package org.lostnomore.backend.subscribe.service;
 
 import lombok.RequiredArgsConstructor;
-import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.LocationErrorCode;
 import org.lostnomore.backend.global.exception.code.SubscribeErrorCode;
@@ -26,6 +25,7 @@ import org.lostnomore.backend.user.domain.User;
 import org.lostnomore.backend.user.manager.UserRetriever;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.elasticsearch.core.SearchHits;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class SubscribeService {
+
 
     private final SubscribeRetriever subscribeRetriever;
     private final LostItemSearchService lostItemSearchService;
