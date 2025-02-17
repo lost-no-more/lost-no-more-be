@@ -24,7 +24,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 .excludePathPatterns(
                         "/auth/oauth/**",
-                        "/auth/reissue"
+                        "/auth/reissue",
+                        "/test/**",
+                        "/items/search/**",
+                        "/items/count"
                 );
     }
 

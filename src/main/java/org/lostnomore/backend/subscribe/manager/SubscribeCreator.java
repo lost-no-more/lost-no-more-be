@@ -1,20 +1,18 @@
 package org.lostnomore.backend.subscribe.manager;
 
 import lombok.RequiredArgsConstructor;
+import org.lostnomore.backend.subscribe.domain.Subscribe;
 import org.lostnomore.backend.subscribe.repository.SubscribeRepository;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SubscribeRemover {
+public class SubscribeCreator {
 
     private final SubscribeRepository subscribeRepository;
 
-    public void deleteById(final Long subscribeId) {
-        subscribeRepository.deleteById(subscribeId);
-    }
 
-    public void deleteByUserId(Long userId) {
-        subscribeRepository.deleteByUserId(userId);
+    public void save(final Subscribe subscribe) {
+        subscribeRepository.save(subscribe);
     }
 }
