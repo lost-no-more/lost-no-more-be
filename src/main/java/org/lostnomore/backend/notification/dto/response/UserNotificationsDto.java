@@ -23,6 +23,7 @@ public record UserNotificationsDto(
             LocalDate date,
             int totalCount,
             String keyword,
+            String region,
             String category,
             boolean readStatus
     ) {
@@ -32,6 +33,7 @@ public record UserNotificationsDto(
                     userNotification.getNotification().getDate(),
                     userNotification.getNotification().getTotalCount(),
                     userNotification.getNotification().getKeyword(),
+                    userNotification.getNotification().getRegion(),
                     userNotification.getNotification().getCategory().getName(),
                     userNotification.getReadStatus()
             );
