@@ -22,4 +22,9 @@ public class CategoryRetriever {
         return categoryRepository.findByName(categoryName)
                 .orElseThrow(() -> new BusinessException(CategoryErrorCode.CATEGORY_NOT_FOUND));
     }
+
+    public Category findByName(final String categoryName) {
+        return categoryRepository.findByName(categoryName)
+                .orElseThrow(() -> new BusinessException(CategoryErrorCode.CATEGORY_NOT_FOUND));
+    }
 }

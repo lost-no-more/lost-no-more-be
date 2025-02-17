@@ -17,7 +17,7 @@ public record RecentItemsDto(
     }
 
     public record RecentItemDto(
-            Long id,
+            Long lostItemId,
             String name,
             LocalDate date,
             String location,

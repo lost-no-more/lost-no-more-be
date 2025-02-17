@@ -6,7 +6,7 @@ import org.lostnomore.backend.item.domain.LostItem;
 import java.time.LocalDate;
 
 public record LostItemListDto(
-        Long id,
+        Long lostItemId,
         String name,
         @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate date,
