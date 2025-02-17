@@ -87,14 +87,19 @@ public class LostItemService {
             LocalDate dateStart, LocalDate dateEnd,
             Double topLeftLat, Double topLeftLon,
             Double bottomRightLat, Double bottomRightLon,
-            String keyword, Long categoryId, String region
+            String keyword, String categoryName, String region
     ) {
+        Category category = null;
+
+        if (categoryName != null && !categoryName.isEmpty()) {
+            category = categoryRetriever.findByName(categoryName);
+        }
 
         SearchHits<LostItemDocument> lostItems = lostItemSearchService.searchLostItems(
                 dateStart, dateEnd,
                 topLeftLat, topLeftLon,
                 bottomRightLat, bottomRightLon,
-                keyword, categoryId, region, null
+                keyword, category != null ? category.getId() : null, region, null
         );
 
         return LostItemsSearchDto.from(lostItems);

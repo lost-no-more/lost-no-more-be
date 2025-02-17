@@ -4,6 +4,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.lostnomore.backend.auth.dto.UserInfoDto;
 import org.lostnomore.backend.auth.dto.response.AccessTokenDto;
 import org.lostnomore.backend.auth.dto.response.KakaoUserDto;
 import org.lostnomore.backend.global.exception.BusinessException;
@@ -31,6 +32,9 @@ public class KakaoProvider implements OAuthProvider{
     @Value("${oauth2.kakao.user-info-url}")
     private String KAKAO_USER_INFO_URL;
 
+    @Value("${oauth2.kakao.unlink-url}")
+    private String KAKAO_UNLINK_URL;
+
     @Value("${oauth2.kakao.code-url}")
     private String KAKAO_CODE_URL;
 
@@ -39,6 +43,9 @@ public class KakaoProvider implements OAuthProvider{
 
     @Value("${oauth2.kakao.client-secret}")
     private String KAKAO_CLIENT_SECRET;
+
+    @Value("${oauth2.kakao.admin-key}")
+    private String KAKAO_ADMIN_KEY;
 
     @Value("${oauth2.kakao.redirect-url}")
     private String KAKAO_LOGIN_REDIRECT_URL;
@@ -86,7 +93,28 @@ public class KakaoProvider implements OAuthProvider{
     }
 
     @Override
-    public String getUserInfo(String accessToken) {
+    public void unLink(String providerId,String code) {
+        try {
+            final MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+            params.add("target_id_type", "user_id");
+            params.add("target_id", Long.parseLong(providerId));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "KakaoAK " + KAKAO_ADMIN_KEY);
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            final HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params, headers);
+
+            restTemplate.postForLocation(KAKAO_UNLINK_URL, request);
+        } catch (HttpClientErrorException e) {
+            throw new BusinessException(AuthErrorCode.INVALID_CODE);
+        } catch (HttpServerErrorException | NullPointerException e) {
+            throw new BusinessException(AuthErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public UserInfoDto getUserInfo(String accessToken) {
         try {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -99,7 +127,8 @@ public class KakaoProvider implements OAuthProvider{
                     request,
                     KakaoUserDto.class
             );
-            return Objects.requireNonNull(response.getBody()).getKakaoAccount().email();
+            KakaoUserDto kakaoUserDto = Objects.requireNonNull(response.getBody());
+            return new UserInfoDto(String.valueOf(kakaoUserDto.getId()), kakaoUserDto.getKakaoAccount().email());
         } catch (HttpClientErrorException e) {
             throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
         } catch (HttpServerErrorException | NullPointerException e) {

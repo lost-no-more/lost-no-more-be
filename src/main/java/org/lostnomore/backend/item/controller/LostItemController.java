@@ -45,7 +45,7 @@ public class LostItemController {
             @RequestParam Double bottom_right_lat,
             @RequestParam Double bottom_right_lon,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Long category_id,
+            @RequestParam(required = false) String category,
             @RequestParam(required = false) String region
     ) {
         return ResponseEntity.ok(ResponseDto.success(lostItemService.searchLostItems(
@@ -53,7 +53,7 @@ public class LostItemController {
                 top_left_lat, top_left_lon,
                 bottom_right_lat, bottom_right_lon,
                 keyword,
-                category_id,
+                category,
                 region
         )));
     }
@@ -62,7 +62,7 @@ public class LostItemController {
     public ResponseEntity<ResponseDto<LostItemsListDto>> searchLostItemsList(
             @RequestBody final LostItemIdsDto lostItemIdsDto
     ) {
-        return ResponseEntity.ok().body(ResponseDto.success(lostItemService.searchLostItemsList(lostItemIdsDto.ids())));
+        return ResponseEntity.ok().body(ResponseDto.success(lostItemService.searchLostItemsList(lostItemIdsDto.lostItemIds())));
     }
 
     @GetMapping("/items/search/{lostItemId}")

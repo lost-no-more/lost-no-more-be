@@ -1,8 +1,10 @@
 package org.lostnomore.backend.auth.controller;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -13,17 +15,30 @@ import org.junit.jupiter.api.Test;
 import org.lostnomore.backend.auth.dto.UserTokenDto;
 import org.lostnomore.backend.auth.provider.CookieProvider;
 import org.lostnomore.backend.auth.provider.OAuthProvider;
+import org.lostnomore.backend.auth.repository.RefreshTokenRepository;
 import org.lostnomore.backend.auth.service.AuthService;
 import org.lostnomore.backend.common.ControllerTest;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.AuthErrorCode;
 import org.lostnomore.backend.global.exception.code.BusinessErrorCode;
+import org.lostnomore.backend.notification.service.NotificationService;
+import org.lostnomore.backend.subscribe.service.SubscribeService;
+import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @WebMvcTest(AuthController.class)
 class AuthControllerTest extends ControllerTest {
+
+    @Mock
+    private RefreshTokenRepository refreshTokenRepository;
+
+    @MockitoBean
+    private SubscribeService subscribeService;
+
+    @MockitoBean
+    private NotificationService notificationService;
 
     @MockitoBean
     private OAuthProvider oAuthProvider;
@@ -112,5 +127,26 @@ class AuthControllerTest extends ControllerTest {
                 .andExpect(jsonPath("$.isSuccess").value(true))
                 .andExpect(jsonPath("$.data").value("newAccessToken"))
                 .andExpect(jsonPath("$.error").doesNotExist());
+    }
+
+    @Test
+    void 로그아웃_요청시_쿠키없으면_오류() throws Exception {
+        // when & then
+        mockMvc.perform(delete("/auth/logout"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.isSuccess").value(false))
+                .andExpect(jsonPath("$.error.code").value(BusinessErrorCode.MISSING_REQUIRED_COOKIE.getHttpStatus().value()))
+                .andExpect(jsonPath("$.error.message").value(BusinessErrorCode.MISSING_REQUIRED_COOKIE.getMessage()));
+    }
+
+    @Test
+    void 회원_탈퇴시_쿠키없으면_오류() throws Exception {
+        // when & then
+        mockMvc.perform(delete("/auth/google/withdraw")
+                        .param("code", "test_code"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.isSuccess").value(false))
+                .andExpect(jsonPath("$.error.code").value(BusinessErrorCode.MISSING_REQUIRED_COOKIE.getHttpStatus().value()))
+                .andExpect(jsonPath("$.error.message").value(BusinessErrorCode.MISSING_REQUIRED_COOKIE.getMessage()));
     }
 }

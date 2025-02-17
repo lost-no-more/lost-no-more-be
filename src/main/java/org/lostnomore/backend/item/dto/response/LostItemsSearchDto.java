@@ -21,7 +21,7 @@ public record LostItemsSearchDto(
     }
 
     public record LostItemSearchDto(
-            Long id,
+            Long lostItemId,
             Double latitude,
             Double longitude
     ) {

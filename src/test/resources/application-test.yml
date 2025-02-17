@@ -3,6 +3,8 @@ spring:
     redis:
       host: localhost
       port: 6379
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URI:http://localhost:9200}
 
 oauth2:
   google:
@@ -13,18 +15,21 @@ oauth2:
     code-url: google-code-url
     token-url: google-token-url
     user-info-url: google-user-info-url
+    unlink-url: google-user-unlink-url
   kakao:
     client-id: kakao-client-id
     client-secret: kakao-client-secret
+    admin-key: admoin-key
     redirect-url: kakao-redirect-url
     scope: account_email
     code-url: kakao-code-url
     token-url: kakao-token-url
     user-info-url: kakao-user-info-url
+    unlink-url: kakao-user-unlink-url
 
 security:
   jwt:
     token:
       secret-key: tetqwfqfoqiwjfqwejklnqwklfjnqwlfknqwklgvnqlgnvlkqwfgnmklqwfgnmlqwlmk
-      access-expire-length: 10 #20분
+      access-expire-length: 1200000 #20분
       refresh-expire-length: 1209600000 #2주

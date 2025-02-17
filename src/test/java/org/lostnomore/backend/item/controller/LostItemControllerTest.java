@@ -60,10 +60,10 @@ class LostItemControllerTest extends ControllerTest {
                         .param("bottom_right_lon", "127.00"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isSuccess").value(true))
-                .andExpect(jsonPath("$.data.lostItems[0].id").value(1L))
+                .andExpect(jsonPath("$.data.lostItems[0].lostItemId").value(1L))
                 .andExpect(jsonPath("$.data.lostItems[0].latitude").value(37.57))
                 .andExpect(jsonPath("$.data.lostItems[0].longitude").value(126.98))
-                .andExpect(jsonPath("$.data.lostItems[1].id").value(2L))
+                .andExpect(jsonPath("$.data.lostItems[1].lostItemId").value(2L))
                 .andExpect(jsonPath("$.data.lostItems[1].latitude").value(37.55))
                 .andExpect(jsonPath("$.data.lostItems[1].longitude").value(127.00));
     }
