@@ -169,7 +169,7 @@ class SubscribeServiceTest extends ServiceTest {
                 .thenReturn(lostItems);
 
         // When
-        SubscribeListDto result = subscribeService.getSubscribeList(testUserId, dateStart, dateEnd, null, null, null, 8);
+        SubscribeListDto result = subscribeService.getSubscribeList(testUserId, dateStart, dateEnd, null, null, null, null,null,8);
 
         // Then
         assertThat(result.lostItems()).hasSize(1);
@@ -192,7 +192,7 @@ class SubscribeServiceTest extends ServiceTest {
                 .thenReturn(Collections.emptyList());
 
         // When
-        SubscribeListDto result = subscribeService.getSubscribeList(testUserId, dateStart, dateEnd, null, null, null, 5);
+        SubscribeListDto result = subscribeService.getSubscribeList(testUserId, dateStart, dateEnd, null, null, null, null,null,5);
 
         // Then
         assertThat(result.lostItems()).isEmpty();
