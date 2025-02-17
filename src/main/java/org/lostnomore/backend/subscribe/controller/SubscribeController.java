@@ -34,12 +34,15 @@ public class SubscribeController {
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date_start,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date_end,
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String region,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate cursorDate,
             @RequestParam(required = false) Long cursorId,
             @RequestParam(defaultValue = "8") int size
     ) {
         return ResponseEntity.ok().body(ResponseDto.success(subscribeService.getSubscribeList(
-                userId, date_start, date_end, keyword,
+                userId, date_start, date_end,
+                keyword, category, region,
                 cursorDate, cursorId, size
         )));
     }
