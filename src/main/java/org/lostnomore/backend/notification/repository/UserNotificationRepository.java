@@ -7,7 +7,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface UserNotificationRepository extends JpaRepository<UserNotification, Long> {
+
+    @Query("""
+       SELECT un FROM UserNotification un
+       JOIN FETCH un.notification n
+       JOIN FETCH n.category
+       WHERE un.user.id = :userId
+       """)
+    List<UserNotification> findByUserId(Long userId);
 
     @Modifying
     @Transactional

@@ -44,4 +44,8 @@ public class UserNotification extends BaseEntity {
         this.notification = notification;
         this.readStatus = readStatus;
     }
+
+    public void updateReadStatus() {
+        this.readStatus = true;
+    }
 }
