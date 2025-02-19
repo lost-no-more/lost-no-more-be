@@ -55,6 +55,76 @@ jobs:
           echo "Elasticsearch is up!"
         shell: bash
 
+      - name: Create Elasticsearch Index  # ✅ Elasticsearch 인덱스 생성
+        run: |
+          echo "Creating Elasticsearch index..."
+          curl -X PUT "http://localhost:9200/lost_item" \
+            -H "Content-Type: application/json" \
+            -d '
+            {
+              "settings": {
+                "analysis": {
+                  "tokenizer": {
+                    "edge_ngram_tokenizer": {
+                      "type": "edge_ngram",
+                      "min_gram": 2,
+                      "max_gram": 5,
+                      "token_chars": ["letter", "digit", "whitespace"]
+                    },
+                    "nori_tokenizer": {
+                      "type": "nori_tokenizer"
+                    }
+                  },
+                  "analyzer": {
+                    "nori_analyzer": {
+                      "type": "custom",
+                      "tokenizer": "nori_tokenizer",
+                      "filter": ["nori_readingform", "nori_part_of_speech"]
+                    },
+                    "ngram_analyzer": {
+                      "type": "custom",
+                      "tokenizer": "edge_ngram_tokenizer"
+                    }
+                  }
+                }
+              },
+              "mappings": {
+                "properties": {
+                  "name": {
+                    "type": "text",
+                    "fields": {
+                      "standard": {
+                        "type": "text",
+                        "analyzer": "standard"
+                      },
+                      "nori": {
+                        "type": "text",
+                        "analyzer": "nori_analyzer"
+                      },
+                      "ngram": {
+                        "type": "text",
+                        "analyzer": "ngram_analyzer"
+                      }
+                    }
+                  },
+                  "date": {
+                    "type": "date"
+                  },
+                  "categoryId": {
+                    "type": "long"
+                  },
+                  "region": {
+                    "type": "text",
+                    "analyzer": "nori_analyzer"
+                  },
+                  "location": {
+                    "type": "geo_point"
+                  }
+                }
+              }
+            }'
+        shell: bash
+
       - name: Check Elasticsearch Health
         run: curl -s http://localhost:9200/_cluster/health?pretty
         shell: bash
