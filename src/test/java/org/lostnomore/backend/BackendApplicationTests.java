@@ -2,8 +2,10 @@ package org.lostnomore.backend;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.lostnomore.backend.item.elastic.LostItemSearchService;
 import org.lostnomore.backend.item.elastic.NoriAnalyzerService;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
@@ -13,6 +15,12 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class BackendApplicationTests {
+
+	@MockitoBean
+	private LostItemSearchService lostItemSearchService;
+
+	@MockitoBean
+	private ElasticsearchOperations elasticsearchOperations;
 
 	@MockitoBean
 	private NoriAnalyzerService noriAnalyzerService;
