@@ -56,20 +56,27 @@ public class LostItemSearchService {
         boolean hasKeyword = (keyword != null && !keyword.isBlank());
 
         if (hasKeyword) {
+            // Nori 기반
+            MatchQuery matchQuery = MatchQuery.of(m -> m
+                    .field("name.nori")
+                    .query(keyword)
+            );
+            shouldQueries.add(matchQuery._toQuery());
+
+            // Edge NGram 기반
+            MatchQuery ngramMatchQuery = MatchQuery.of(m -> m
+                    .field("name.ngram")
+                    .query(keyword)
+            );
+            shouldQueries.add(ngramMatchQuery._toQuery());
+
             // 유사 검색
             FuzzyQuery fuzzyQuery = FuzzyQuery.of(f -> f
                     .field("name")
                     .value(keyword)
-                    .fuzziness("AUTO")
+                    .fuzziness("AUTO") // 자동으로 철자 오류 보정
             );
             shouldQueries.add(fuzzyQuery._toQuery());
-
-            // 부분 검색
-            PrefixQuery prefixQuery = PrefixQuery.of(p -> p
-                    .field("name")
-                    .value(keyword)
-            );
-            shouldQueries.add(prefixQuery._toQuery());
         }
 
         // 카테고리
