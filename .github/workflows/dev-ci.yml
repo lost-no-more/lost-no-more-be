@@ -152,12 +152,6 @@ jobs:
           ./gradlew build
         shell: bash
 
-      - name: Run Tests with Debugging**
-        run: |
-          echo "Running tests with debug logs..."
-          ./gradlew test --info --stacktrace
-        shell: bash
-
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
