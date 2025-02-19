@@ -67,18 +67,18 @@ public class SubscribeService {
     public SubscribeListDto getSubscribeList(
             final Long userId,
             final LocalDate dateStart, final LocalDate dateEnd,
-            final String keyword,
+            final String keyword, final String category, final String region,
             final LocalDate cursorDate,
             final Long cursorId,
             final int size
     ) {
-        List<Subscribe> subscribes = subscribeRetriever.findByUserId(userId);
 
-        if (keyword != null) {
-            subscribes = subscribes.stream()
-                    .filter(subscribe -> keyword.equals(subscribe.getKeyword()))
-                    .toList();
-        }
+        List<Subscribe> subscribes = subscribeRetriever.findByUserId(userId)
+                .stream()
+                .filter(subscribe -> keyword == null || keyword.equals(subscribe.getKeyword()))
+                .filter(subscribe -> category == null || category.equals(subscribe.getCategory().getName()))
+                .filter(subscribe -> region == null || region.equals(subscribe.getRegion()))
+                .toList();
 
         Set<Long> lostItemIds = searchLostItemIds(subscribes, dateStart, dateEnd, null);
 
