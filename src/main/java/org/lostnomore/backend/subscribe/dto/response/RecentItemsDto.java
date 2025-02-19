@@ -21,6 +21,7 @@ public record RecentItemsDto(
             String name,
             LocalDate date,
             String location,
+            String category,
             String imageUrl
     ) {
         public static RecentItemDto from(LostItem item) {
@@ -29,6 +30,7 @@ public record RecentItemsDto(
                     item.getName(),
                     item.getDate(),
                     item.getLocation().getName(),
+                    item.getCategory().getName(),
                     item.getImage()
             );
         }
