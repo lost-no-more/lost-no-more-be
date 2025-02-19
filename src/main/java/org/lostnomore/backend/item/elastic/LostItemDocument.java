@@ -3,10 +3,7 @@ package org.lostnomore.backend.item.elastic;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.elasticsearch.annotations.GeoPointField;
+import org.springframework.data.elasticsearch.annotations.*;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 
 import java.time.LocalDate;
@@ -18,7 +15,12 @@ public class LostItemDocument {
     @Id
     private Long id;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer", searchAnalyzer = "nori_analyzer"),
+            otherFields = {
+                    @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer")
+            }
+    )
     private String name;
 
     @Field(type = FieldType.Date)
@@ -27,7 +29,7 @@ public class LostItemDocument {
     @Field(type = FieldType.Long)
     private Long categoryId;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
+    @Field(type = FieldType.Text, analyzer = "nori_analyzer", searchAnalyzer = "nori_analyzer")
     private String region;
 
     @GeoPointField
