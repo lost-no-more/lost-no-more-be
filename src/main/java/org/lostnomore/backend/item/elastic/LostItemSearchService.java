@@ -24,6 +24,7 @@ import java.util.List;
 public class LostItemSearchService {
 
     private final ElasticsearchOperations elasticsearchOperations;
+    private final NoriAnalyzerService noriAnalyzerService;
 
     @Transactional(readOnly = true)
     public SearchHits<LostItemDocument> searchLostItems(
@@ -56,25 +57,46 @@ public class LostItemSearchService {
         boolean hasKeyword = (keyword != null && !keyword.isBlank());
 
         if (hasKeyword) {
-            // Nori 기반
-            MatchQuery matchQuery = MatchQuery.of(m -> m
-                    .field("name.nori")
-                    .query(keyword)
-            );
-            shouldQueries.add(matchQuery._toQuery());
+
+            List<String> tokens = noriAnalyzerService.analyzeKeyword(keyword);
+
+            if (tokens.size() > 1) {
+                // 다중 토큰일 경우 각 토큰을 전부 must로 추가
+                for (String token : tokens) {
+                    MatchQuery multiTokenMatch = MatchQuery.of(m -> m
+                            .field("name.nori")
+                            .query(token)
+                    );
+                    mustQueries.add(multiTokenMatch._toQuery());
+                }
+            } else {
+                // 단일 토큰일 경우 기존처럼 should에 추가
+                MatchQuery singleTokenMatch = MatchQuery.of(m -> m
+                        .field("name.nori")
+                        .query(keyword)
+                );
+                shouldQueries.add(singleTokenMatch._toQuery());
+            }
 
             // Edge NGram 기반
-            MatchQuery ngramMatchQuery = MatchQuery.of(m -> m
+            MatchQuery ngramQuery = MatchQuery.of(m -> m
                     .field("name.ngram")
                     .query(keyword)
             );
-            shouldQueries.add(ngramMatchQuery._toQuery());
+            shouldQueries.add(ngramQuery._toQuery());
 
-            // 유사 검색
+            // 접두사 기반 검색
+            MatchPhrasePrefixQuery phrasePrefix = MatchPhrasePrefixQuery.of(m -> m
+                    .field("name.nori")
+                    .query(keyword)
+            );
+            shouldQueries.add(phrasePrefix._toQuery());
+
+            // Fuzzy 철자 오류 보정
             FuzzyQuery fuzzyQuery = FuzzyQuery.of(f -> f
                     .field("name")
                     .value(keyword)
-                    .fuzziness("AUTO") // 자동으로 철자 오류 보정
+                    .fuzziness("AUTO")
             );
             shouldQueries.add(fuzzyQuery._toQuery());
         }

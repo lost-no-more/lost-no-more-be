@@ -16,8 +16,9 @@ public class LostItemDocument {
     private Long id;
 
     @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer", searchAnalyzer = "nori_analyzer"),
+            mainField = @Field(type = FieldType.Text, analyzer = "standard"),
             otherFields = {
+                    @InnerField(suffix = "nori", type = FieldType.Text, analyzer = "nori_analyzer"),
                     @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer")
             }
     )
