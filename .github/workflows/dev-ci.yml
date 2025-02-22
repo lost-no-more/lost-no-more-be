@@ -55,6 +55,93 @@ jobs:
           echo "Elasticsearch is up!"
         shell: bash
 
+      - name: Install Elasticsearch Nori Plugin
+        run: |
+          echo "Installing Nori plugin..."
+          until curl -s http://localhost:9200 > /dev/null; do sleep 2; done
+          docker exec $(docker ps -q --filter ancestor=docker.elastic.co/elasticsearch/elasticsearch:8.17.1) \
+          bin/elasticsearch-plugin install analysis-nori
+          echo "Restarting Elasticsearch..."
+          docker restart $(docker ps -q --filter ancestor=docker.elastic.co/elasticsearch/elasticsearch:8.17.1)
+        shell: bash
+
+      - name: Wait for Elasticsearch after Restart
+        run: |
+          echo "Waiting for Elasticsearch to be available after restart..."
+          timeout 60s bash -c 'until curl -s http://localhost:9200 > /dev/null; do sleep 2; echo "Still waiting..."; done'
+          echo "Elasticsearch is up after restart!"
+        shell: bash
+
+      - name: Create Elasticsearch Index
+        run: |
+          echo "Creating Elasticsearch index..."
+          curl -X PUT "http://localhost:9200/lost_item" \
+            -H "Content-Type: application/json" \
+            -d '
+            {
+              "settings": {
+                "analysis": {
+                  "tokenizer": {
+                    "edge_ngram_tokenizer": {
+                      "type": "edge_ngram",
+                      "min_gram": 2,
+                      "max_gram": 5,
+                      "token_chars": ["letter", "digit", "whitespace"]
+                    },
+                    "nori_tokenizer": {
+                      "type": "nori_tokenizer"
+                    }
+                  },
+                  "analyzer": {
+                    "nori_analyzer": {
+                      "type": "custom",
+                      "tokenizer": "nori_tokenizer",
+                      "filter": ["nori_readingform", "nori_part_of_speech"]
+                    },
+                    "ngram_analyzer": {
+                      "type": "custom",
+                      "tokenizer": "edge_ngram_tokenizer"
+                    }
+                  }
+                }
+              },
+              "mappings": {
+                "properties": {
+                  "name": {
+                    "type": "text",
+                    "fields": {
+                      "standard": {
+                        "type": "text",
+                        "analyzer": "standard"
+                      },
+                      "nori": {
+                        "type": "text",
+                        "analyzer": "nori_analyzer"
+                      },
+                      "ngram": {
+                        "type": "text",
+                        "analyzer": "ngram_analyzer"
+                      }
+                    }
+                  },
+                  "date": {
+                    "type": "date"
+                  },
+                  "categoryId": {
+                    "type": "long"
+                  },
+                  "region": {
+                    "type": "text",
+                    "analyzer": "nori_analyzer"
+                  },
+                  "location": {
+                    "type": "geo_point"
+                  }
+                }
+              }
+            }'
+        shell: bash
+
       - name: Check Elasticsearch Health
         run: curl -s http://localhost:9200/_cluster/health?pretty
         shell: bash
