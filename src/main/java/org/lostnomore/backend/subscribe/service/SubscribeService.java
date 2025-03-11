@@ -14,6 +14,7 @@ import org.lostnomore.backend.item.manager.LocationRetriever;
 import org.lostnomore.backend.item.manager.LostItemRetriever;
 import org.lostnomore.backend.subscribe.domain.Subscribe;
 import org.lostnomore.backend.subscribe.dto.request.SubscribeCreateDto;
+import org.lostnomore.backend.subscribe.dto.request.SubscribeUpdateDto;
 import org.lostnomore.backend.subscribe.dto.response.RecentItemsDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribesDto;
@@ -128,14 +129,10 @@ public class SubscribeService {
             final SubscribeCreateDto subscribeCreateDto
     ) {
        User user = userRetriever.findById(userId);
-       validateRegionExists(subscribeCreateDto.region());
-       Category category = categoryRetriever.findByName(subscribeCreateDto.category());
 
        Subscribe subscribe = Subscribe.builder()
                .user(user)
                .keyword(subscribeCreateDto.keyword())
-               .category(category)
-               .region(subscribeCreateDto.region())
                .build();
 
         try {
@@ -165,7 +162,7 @@ public class SubscribeService {
     public void updateSubscribe(
             final Long userId,
             final Long subscribeId,
-            final SubscribeCreateDto subscribeDto
+            final SubscribeUpdateDto subscribeDto
     ) {
         Subscribe subscribe = subscribeRetriever.findById(subscribeId);
         validateSubscribeOwner(userId, subscribe);
