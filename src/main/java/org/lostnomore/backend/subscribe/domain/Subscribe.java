@@ -28,13 +28,13 @@ public class Subscribe extends BaseEntity {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @Column(name = "keyword", nullable = false)
     private String keyword;
 
-    @Column(name = "region", nullable = false)
+    @Column(name = "region")
     private String region;
 
     @Builder
