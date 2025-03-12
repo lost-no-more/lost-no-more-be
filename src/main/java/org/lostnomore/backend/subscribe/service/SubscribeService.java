@@ -107,7 +107,7 @@ public class SubscribeService {
             SearchHits<LostItemDocument> searchHits = lostItemSearchService.searchLostItemsForSubscription(
                     dateStart, dateEnd,
                     subscribe.getKeyword(),
-                    subscribe.getCategory().getId(),
+                    subscribe.getCategory() != null ? subscribe.getCategory().getId() : null,
                     subscribe.getRegion(),
                     size
             );
