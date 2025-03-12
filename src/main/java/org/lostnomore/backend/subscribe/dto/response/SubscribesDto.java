@@ -27,7 +27,7 @@ public record SubscribesDto(
             return new SubscribeDto(
                     subscribe.getId(),
                     subscribe.getKeyword(),
-                    subscribe.getCategory().getName(),
+                    subscribe.getCategory() != null ? subscribe.getCategory().getName() : null,
                     subscribe.getRegion()
             );
         }

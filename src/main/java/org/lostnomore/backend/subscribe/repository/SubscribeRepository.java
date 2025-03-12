@@ -13,7 +13,7 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
 
     @Query("""
        SELECT s FROM Subscribe s
-       JOIN FETCH s.category
+       LEFT JOIN FETCH s.category
        WHERE s.user.id = :userId
        """)
     List<Subscribe> findByUserId(Long userId);
