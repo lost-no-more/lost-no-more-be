@@ -17,6 +17,7 @@ import org.lostnomore.backend.item.manager.LocationRetriever;
 import org.lostnomore.backend.item.manager.LostItemRetriever;
 import org.lostnomore.backend.subscribe.domain.Subscribe;
 import org.lostnomore.backend.subscribe.dto.request.SubscribeCreateDto;
+import org.lostnomore.backend.subscribe.dto.request.SubscribeUpdateDto;
 import org.lostnomore.backend.subscribe.dto.response.RecentItemsDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribesDto;
@@ -37,7 +38,6 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -90,6 +90,7 @@ class SubscribeServiceTest extends ServiceTest {
     private LostItem lostItem;
     private List<LostItem> lostItems;
     private SubscribeCreateDto subscribeCreateDto;
+    private SubscribeUpdateDto subscribeUpdateDto;
     private final LocalDate dateEnd = LocalDate.now().minusDays(1);
     private final LocalDate dateStart = dateEnd.minusDays(7);
 
@@ -106,7 +107,8 @@ class SubscribeServiceTest extends ServiceTest {
         category = Category.builder().name("지갑").build();
         location = Location.builder().name("서울").build();
 
-        subscribeCreateDto = new SubscribeCreateDto("고양이지갑", "지갑", "서울");
+        subscribeCreateDto = new SubscribeCreateDto("고양이지갑");
+        subscribeUpdateDto = new SubscribeUpdateDto("고양이지갑", "지갑", "서울");
 
         subscribe = Subscribe.builder()
                 .user(testUser)
@@ -205,21 +207,15 @@ class SubscribeServiceTest extends ServiceTest {
     void createSubscribeTest() {
         // Given
         when(userRetriever.findById(anyLong())).thenReturn(testUser);
-        when(categoryRetriever.findByName(anyString())).thenReturn(category);
-        when(locationRetriever.findByRegion(anyString())).thenReturn(List.of(location));
 
         // When
         subscribeService.createSubscribe(testUserId, subscribeCreateDto);
 
         // Then
         verify(userRetriever, times(1)).findById(testUserId);
-        verify(categoryRetriever, times(1)).findByName(subscribeCreateDto.category());
-        verify(locationRetriever, times(1)).findByRegion(subscribeCreateDto.region());
         verify(subscribeCreator, times(1)).save(argThat(subscribe ->
                 subscribe.getUser().equals(testUser) &&
-                        subscribe.getKeyword().equals(subscribeCreateDto.keyword()) &&
-                        subscribe.getRegion().equals(subscribeCreateDto.region()) &&
-                        subscribe.getCategory().equals(category)
+                        subscribe.getKeyword().equals(subscribeCreateDto.keyword())
         ));
     }
 
@@ -228,8 +224,6 @@ class SubscribeServiceTest extends ServiceTest {
     void createSubscribe_DuplicateTest() {
         // Given
         when(userRetriever.findById(anyLong())).thenReturn(testUser);
-        when(categoryRetriever.findByName(anyString())).thenReturn(category);
-        when(locationRetriever.findByRegion(anyString())).thenReturn(List.of(location));
         doThrow(new DataIntegrityViolationException("Duplicate entry"))
                 .when(subscribeCreator).save(any(Subscribe.class));
 
@@ -309,7 +303,7 @@ class SubscribeServiceTest extends ServiceTest {
     @DisplayName("구독 정보 업데이트가 성공한다.")
     void updateSubscribeTest() {
         // Given
-        SubscribeCreateDto updatedSubscribeDto = new SubscribeCreateDto("백팩", "가방", "부산");
+        SubscribeUpdateDto updatedSubscribeDto = new SubscribeUpdateDto("백팩", "가방", "부산");
         when(subscribeRetriever.findById(anyLong())).thenReturn(subscribe);
         when(categoryRetriever.findByName(anyString())).thenReturn(category);
         when(locationRetriever.findByRegion(anyString())).thenReturn(List.of(location));
@@ -336,7 +330,7 @@ class SubscribeServiceTest extends ServiceTest {
                 .region("부산")
                 .category(category)
                 .build();
-        SubscribeCreateDto updatedSubscribeDto = new SubscribeCreateDto("가방", "부산", "전자기기");
+        SubscribeUpdateDto updatedSubscribeDto = new SubscribeUpdateDto("가방", "부산", "전자기기");
 
         when(subscribeRetriever.findById(anyLong())).thenReturn(anotherSubscribe);
 

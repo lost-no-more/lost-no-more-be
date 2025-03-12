@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.global.LoginUser;
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.subscribe.dto.request.SubscribeCreateDto;
+import org.lostnomore.backend.subscribe.dto.request.SubscribeUpdateDto;
 import org.lostnomore.backend.subscribe.dto.response.RecentItemsDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribeListDto;
 import org.lostnomore.backend.subscribe.dto.response.SubscribesDto;
@@ -76,9 +77,9 @@ public class SubscribeController {
     public ResponseEntity<ResponseDto<Void>> updateSubscribe (
             @LoginUser final Long userId,
             @PathVariable final Long subscribeId,
-            @RequestBody final SubscribeCreateDto subscribeCreateDto
+            @RequestBody final SubscribeUpdateDto subscribeUpdateDto
     ) {
-        subscribeService.updateSubscribe(userId, subscribeId, subscribeCreateDto);
+        subscribeService.updateSubscribe(userId, subscribeId, subscribeUpdateDto);
         return ResponseEntity.ok().body(ResponseDto.success());
     }
 }

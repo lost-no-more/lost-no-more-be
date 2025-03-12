@@ -3,7 +3,6 @@ package org.lostnomore.backend.subscribe.manager;
 import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.item.domain.Category;
 import org.lostnomore.backend.subscribe.domain.Subscribe;
-import org.lostnomore.backend.subscribe.dto.request.SubscribeCreateDto;
 import org.lostnomore.backend.subscribe.repository.SubscribeRepository;
 import org.springframework.stereotype.Component;
 
