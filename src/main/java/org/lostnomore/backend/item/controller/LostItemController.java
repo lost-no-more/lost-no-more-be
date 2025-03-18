@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -60,9 +61,9 @@ public class LostItemController {
 
     @GetMapping("/items/search/list")
     public ResponseEntity<ResponseDto<LostItemsListDto>> searchLostItemsList(
-            @RequestBody final LostItemIdsDto lostItemIdsDto
+            @RequestParam final List<Long> lostItemIds
     ) {
-        return ResponseEntity.ok().body(ResponseDto.success(lostItemService.searchLostItemsList(lostItemIdsDto.lostItemIds())));
+        return ResponseEntity.ok().body(ResponseDto.success(lostItemService.searchLostItemsList(lostItemIds)));
     }
 
     @GetMapping("/items/search/{lostItemId}")
