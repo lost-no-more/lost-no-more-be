@@ -15,7 +15,7 @@ import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.SecretKey;
-import org.lostnomore.backend.auth.dto.UserTokenDto;
+import org.lostnomore.backend.auth.oauth.dto.UserTokenResponse;
 import org.lostnomore.backend.global.exception.ExpiredPeriodJwtException;
 import org.lostnomore.backend.global.exception.InvalidJwtException;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,11 +36,11 @@ public class JwtTokenProvider {
         this.refreshTokenExpireLength = refreshTokenExpireLength;
     }
 
-    public UserTokenDto createLoginToken(final Long payload) {
+    public UserTokenResponse createLoginToken(final Long payload) {
         String accessToken = createAccessToken(payload);
         String refreshToken = createRefreshToken(payload);
 
-        return new UserTokenDto(accessToken, refreshToken);
+        return new UserTokenResponse(accessToken, refreshToken);
     }
 
     public String createAccessToken(final Long payload) {
@@ -131,15 +131,5 @@ public class JwtTokenProvider {
 
     public String regenerateRefreshToken(final Long subject) {
         return createToken(subject, refreshTokenExpireLength);
-    }
-
-    public boolean isValidRefreshAndValidAccess(final String refreshToken, final String accessToken) {
-        try {
-            validateRefreshToken(refreshToken);
-            validateAccessToken(accessToken);
-            return true;
-        } catch (final JwtException e) {
-            return false;
-        }
     }
 }
