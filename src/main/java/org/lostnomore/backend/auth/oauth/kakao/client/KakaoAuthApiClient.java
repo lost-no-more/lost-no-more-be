@@ -1,4 +1,4 @@
-package org.lostnomore.backend.auth.oauth.kakao;
+package org.lostnomore.backend.auth.oauth.kakao.client;
 
 import org.lostnomore.backend.auth.oauth.kakao.dto.KakaoTokenResponse;
 import org.springframework.cloud.openfeign.FeignClient;

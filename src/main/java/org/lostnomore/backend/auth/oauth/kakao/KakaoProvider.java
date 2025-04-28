@@ -3,6 +3,8 @@ package org.lostnomore.backend.auth.oauth.kakao;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
+import org.lostnomore.backend.auth.oauth.kakao.client.KakaoApiClient;
+import org.lostnomore.backend.auth.oauth.kakao.client.KakaoAuthApiClient;
 import org.lostnomore.backend.auth.oauth.kakao.dto.KakaoTokenResponse;
 import org.lostnomore.backend.auth.oauth.kakao.dto.KakaoUserResponse;
 import org.springframework.beans.factory.annotation.Value;
