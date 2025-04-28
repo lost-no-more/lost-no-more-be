@@ -23,8 +23,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(new AccessTokenInterceptor(jwtTokenProvider, bearerAuthorizationExtractor))
                 .addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/auth/oauth/**",
-                        "/auth/reissue",
+                        "/auth/code",
+                        "/auth/login",
                         "/test/**",
                         "/items/search/**",
                         "/items/count"
