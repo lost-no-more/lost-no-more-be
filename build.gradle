@@ -5,6 +5,10 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
+ext {
+	springCloudVersion = "2024.0.1"
+}
+
 group = 'org.lostnomore'
 version = '0.0.1-SNAPSHOT'
 
@@ -26,6 +30,7 @@ dependencies {
 	// Spring
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	// Lombok
@@ -35,6 +40,7 @@ dependencies {
 	// JWT를 위한 의존성
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 	// Database
@@ -56,7 +62,7 @@ dependencies {
 
 	//elastic
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
-	implementation 'co.elastic.clients:elasticsearch-java:8.15.5'
+	implementation 'co.elastic.clients:elasticsearch-java:8.17.1'
 }
 
 tasks.named('test') {
@@ -69,5 +75,11 @@ jacocoTestReport {
 	dependsOn test
 	reports {
 		xml.required.set(true)
+	}
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
 	}
 }
