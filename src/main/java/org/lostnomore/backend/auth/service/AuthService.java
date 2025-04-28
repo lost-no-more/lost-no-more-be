@@ -2,17 +2,16 @@ package org.lostnomore.backend.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.auth.domain.RefreshToken;
-import org.lostnomore.backend.auth.dto.UserInfoDto;
-import org.lostnomore.backend.auth.dto.UserTokenDto;
+import org.lostnomore.backend.auth.oauth.dto.UserTokenResponse;
+import org.lostnomore.backend.auth.oauth.kakao.KakaoProvider;
+import org.lostnomore.backend.auth.oauth.kakao.dto.KakaoUserResponse;
 import org.lostnomore.backend.auth.provider.JwtTokenProvider;
-import org.lostnomore.backend.auth.provider.OAuthProviderFinder;
 import org.lostnomore.backend.auth.repository.RefreshTokenRepository;
 import org.lostnomore.backend.auth.util.BearerAuthorizationExtractor;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.AuthErrorCode;
 import org.lostnomore.backend.notification.manager.UserNotificationRemover;
 import org.lostnomore.backend.subscribe.manager.SubscribeRemover;
-import org.lostnomore.backend.user.domain.SocialType;
 import org.lostnomore.backend.user.domain.User;
 import org.lostnomore.backend.user.manager.UserCreator;
 import org.lostnomore.backend.user.manager.UserRemover;
@@ -25,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final OAuthProviderFinder oAuthProviderFinder;
+    private final KakaoProvider kakaoProvider;
     private final UserService userService;
     private final UserRetriever userRetriever;
     private final UserCreator userCreator;
@@ -36,27 +35,25 @@ public class AuthService {
     private final UserNotificationRemover userNotificationRemover;
     private final UserRemover userRemover;
 
-    public String getCodeLink(String provider) {
-        return oAuthProviderFinder.getOAuthProvider(provider).getCodeUrl();
+    public String getCodeLink() {
+        return kakaoProvider.getCodeUrl();
     }
 
     @Transactional
-    public UserTokenDto oauthLogin(String provider, String code) {
-        String oauthAccessToken = oAuthProviderFinder.getOAuthProvider(provider).getAccessToken(code);
-        UserInfoDto userInfo = oAuthProviderFinder.getOAuthProvider(provider).getUserInfo(oauthAccessToken);
+    public UserTokenResponse oauthLogin(String code) {
 
-        SocialType socialType = SocialType.valueOf(provider.toUpperCase());
+        KakaoUserResponse userInfo = kakaoProvider.getUserInfo(code);
 
         User user;
-        user = userRetriever.findByProviderId(userInfo.getProviderId());
+        user = userRetriever.findByProviderId(userInfo.id());
 
         if (user == null) {
-            user = userService.register(userInfo.getProviderId(), userInfo.getEmail(), socialType);
+            user = userService.register(userInfo.id(), userInfo.kakaoAccount().email());
             userCreator.save(user);
         }
 
         Long userId = user.getId();
-        UserTokenDto loginToken = jwtTokenProvider.createLoginToken(userId);
+        UserTokenResponse loginToken = jwtTokenProvider.createLoginToken(userId);
         RefreshToken savedRefreshToken = new RefreshToken(loginToken.getRefreshToken(), userId);
         refreshTokenRepository.save(savedRefreshToken);
 
@@ -64,7 +61,7 @@ public class AuthService {
     }
 
     @Transactional
-    public UserTokenDto reissue(String refreshTokenRequest, String requestHeader) {
+    public UserTokenResponse reissue(String refreshTokenRequest, String requestHeader) {
         jwtTokenProvider.validateRefreshToken(refreshTokenRequest);
         String expiredAccessToken = bearerExtractor.extractAccessToken(requestHeader);
 
@@ -83,7 +80,7 @@ public class AuthService {
         refreshTokenRepository.deleteById(refreshTokenRequest);
         refreshTokenRepository.save(new RefreshToken(regeneratedRefreshToken, userId));
 
-        return new UserTokenDto(regeneratedAccessToken, regeneratedRefreshToken);
+        return new UserTokenResponse(regeneratedAccessToken, regeneratedRefreshToken);
     }
 
     @Transactional
@@ -92,10 +89,10 @@ public class AuthService {
     }
 
     @Transactional
-    public void withdraw(String provider, String code, Long userId, String refreshToken) {
+    public void withdraw(Long userId, String refreshToken) {
 
-        String providerId = userRetriever.findByUserId(userId).getProviderId();
-        oAuthProviderFinder.getOAuthProvider(provider).unLink(providerId, code);
+        Long providerId = userRetriever.findByUserId(userId).getProviderId();
+        kakaoProvider.unLink(providerId);
 
         refreshTokenRepository.deleteById(refreshToken);
 
