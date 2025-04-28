@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByProviderId(String providerId);
+    Optional<User> findByProviderId(Long providerId);
 
     @Modifying
     @Transactional

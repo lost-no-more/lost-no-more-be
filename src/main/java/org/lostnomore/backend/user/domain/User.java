@@ -25,7 +25,7 @@ public class User {
     private Long id;
 
     @Column(name = "provider_id", nullable = false, unique = true)
-    private String providerId;
+    private Long providerId;
 
     @Column(name = "email", nullable = false)
     private String email;
@@ -33,15 +33,13 @@ public class User {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Enumerated(value = EnumType.STRING)
     @Column(name = "social_type", nullable = false)
-    private SocialType socialType;
+    private String socialType = "KAKAO";
 
     @Builder
-    public User(String providerId, String email, String name, SocialType socialType) {
+    public User(Long providerId, String email, String name) {
         this.providerId = providerId;
         this.email = email;
         this.name = name;
-        this.socialType = socialType;
     }
 }
