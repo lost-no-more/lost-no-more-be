@@ -2,7 +2,7 @@ package org.lostnomore.backend.auth.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.lostnomore.backend.auth.dto.UserTokenDto;
+import org.lostnomore.backend.auth.oauth.dto.UserTokenResponse;
 import org.lostnomore.backend.auth.provider.CookieProvider;
 import org.lostnomore.backend.auth.service.AuthService;
 import org.lostnomore.backend.global.LoginUser;
@@ -12,9 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,42 +25,35 @@ public class AuthController {
     private final AuthService authService;
     private final CookieProvider cookieProvider;
 
-    @GetMapping("/oauth/{provider}/code")
-    public ResponseEntity<ResponseDto> getCodeLink(@PathVariable String provider) {
-        String loginLink = authService.getCodeLink(provider);
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(loginLink));
+    @GetMapping("/code")
+    public ResponseEntity<ResponseDto<String>> getCodeLink() {
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(authService.getCodeLink()));
     }
 
-    @PostMapping("/oauth/{provider}/login")
-    public ResponseEntity<ResponseDto> oauth(@PathVariable String provider, @RequestParam String code,
-                                             HttpServletResponse response) {
-        UserTokenDto userTokenDto = authService.oauthLogin(provider, code);
-        cookieProvider.createCookie(userTokenDto.getRefreshToken(), response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokenDto.getAccessToken()));
+    @PostMapping("/login")
+    public ResponseEntity<ResponseDto<String>> oauth(@RequestParam String code, HttpServletResponse response) {
+        UserTokenResponse userTokenResponse = authService.oauthLogin(code);
+        cookieProvider.createCookie(userTokenResponse.refreshToken(), response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokenResponse.accessToken()));
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<ResponseDto> reissue(@CookieValue("refresh-token") final String refreshToken,
-                                             @RequestHeader("Authorization") final String authorizationHeader,
-                                             HttpServletResponse response) {
-
-        UserTokenDto userTokenDto = authService.reissue(refreshToken, authorizationHeader);
-        cookieProvider.createCookie(userTokenDto.getRefreshToken(), response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokenDto.getAccessToken()));
+    public ResponseEntity<ResponseDto<String>> reissue(@CookieValue("refresh-token") final String refreshToken,
+                                                       HttpServletResponse response) {
+        UserTokenResponse userTokenResponse = authService.reissue(refreshToken);
+        cookieProvider.createCookie(userTokenResponse.refreshToken(), response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokenResponse.accessToken()));
     }
 
     @DeleteMapping("/logout")
-    public ResponseEntity<ResponseDto> logout(@LoginUser final Long userId,
-                                       @CookieValue("refresh-token") final String refreshToken) {
-        authService.logout(refreshToken);
+    public ResponseEntity<ResponseDto<Void>> logout(@LoginUser final Long userId) {
+        authService.logout(userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ResponseDto.success());
     }
 
-    @DeleteMapping("/{provider}/withdraw")
-    public ResponseEntity<ResponseDto> withdraw(@PathVariable String provider, @RequestParam(required = false) String code,
-                                                @LoginUser final Long userId,
-                                                @CookieValue("refresh-token") final String refreshToken) {
-        authService.withdraw(provider, code, userId, refreshToken);
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<ResponseDto<Void>> withdraw(@LoginUser final Long userId) {
+        authService.withdraw(userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ResponseDto.success());
     }
 }

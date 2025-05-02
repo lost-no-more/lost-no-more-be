@@ -28,6 +28,6 @@ public class AccessTokenArgumentResolver implements HandlerMethodArgumentResolve
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         String accessToken = bearerAuthorizationExtractor.extractAccessToken(request.getHeader("Authorization"));
-        return jwtTokenProvider.getSubject(accessToken);
+        return Long.parseLong(jwtTokenProvider.getUserIdOnToken(accessToken));
     }
 }

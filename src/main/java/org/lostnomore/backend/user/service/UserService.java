@@ -9,12 +9,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
 
-    public User register(String providerId, String email, SocialType socialType) {
+    public User register(Long providerId, String email) {
         return User.builder()
                 .providerId(providerId)
                 .email(email)
                 .name(getName(email))
-                .socialType(socialType)
                 .build();
     }
 

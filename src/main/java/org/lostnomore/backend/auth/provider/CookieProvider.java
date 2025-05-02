@@ -9,12 +9,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class CookieProvider {
 
-    public static final int COOKIE_AGE_SECONDS = 1209600;
+    private static final long DAYS_IN_MILLISECONDS = 24 * 60 * 60 * 1000L;
+    private static final int REFRESH_TOKEN_EXPIRATION_DAYS = 14;
 
     public void createCookie(String refreshToken, HttpServletResponse response) {
 
         ResponseCookie cookie = ResponseCookie.from("refresh-token", refreshToken)
-                .maxAge(COOKIE_AGE_SECONDS)
+                .maxAge(REFRESH_TOKEN_EXPIRATION_DAYS * DAYS_IN_MILLISECONDS)
                 .sameSite("None")
                 .secure(true)
                 .httpOnly(true)

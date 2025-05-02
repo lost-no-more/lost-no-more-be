@@ -20,7 +20,7 @@ public class UserRetriever {
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.NON_EXISTENT_USER));
     }
 
-    public User findByProviderId(String providerId) {
+    public User findByProviderId(Long providerId) {
         return userRepository.findByProviderId(providerId)
                 .orElse(null);
     }
