@@ -1,6 +1,6 @@
 package org.lostnomore.backend.auth.util;
 
-import static org.lostnomore.backend.global.exception.code.AuthErrorCode.INVALID_ACCESS_TOKEN;
+import static org.lostnomore.backend.global.exception.code.AuthErrorCode.INVALID_TOKEN;
 
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.springframework.stereotype.Component;
@@ -14,6 +14,6 @@ public class BearerAuthorizationExtractor {
         if (header != null && header.startsWith(BEARER_TYPE)) {
             return header.substring(BEARER_TYPE.length()).trim();
         }
-        throw new BusinessException(INVALID_ACCESS_TOKEN);
+        throw new BusinessException(INVALID_TOKEN);
     }
 }
