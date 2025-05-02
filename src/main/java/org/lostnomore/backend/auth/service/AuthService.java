@@ -1,17 +1,12 @@
 package org.lostnomore.backend.auth.service;
 
 import lombok.RequiredArgsConstructor;
-import org.lostnomore.backend.auth.domain.RefreshToken;
 import org.lostnomore.backend.auth.oauth.dto.UserTokenResponse;
 import org.lostnomore.backend.auth.oauth.kakao.KakaoProvider;
 import org.lostnomore.backend.auth.oauth.kakao.dto.KakaoUserResponse;
 import org.lostnomore.backend.auth.provider.JwtTokenProvider;
-import org.lostnomore.backend.auth.repository.RefreshTokenRepository;
-import org.lostnomore.backend.auth.util.BearerAuthorizationExtractor;
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.AuthErrorCode;
-import org.lostnomore.backend.notification.manager.UserNotificationRemover;
-import org.lostnomore.backend.subscribe.manager.SubscribeRemover;
 import org.lostnomore.backend.user.domain.User;
 import org.lostnomore.backend.user.manager.UserCreator;
 import org.lostnomore.backend.user.manager.UserRemover;
@@ -29,10 +24,6 @@ public class AuthService {
     private final UserRetriever userRetriever;
     private final UserCreator userCreator;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final BearerAuthorizationExtractor bearerExtractor;
-    private final SubscribeRemover subscribeRemover;
-    private final UserNotificationRemover userNotificationRemover;
     private final UserRemover userRemover;
 
     public String getCodeLink() {
@@ -53,51 +44,37 @@ public class AuthService {
         }
 
         Long userId = user.getId();
-        UserTokenResponse loginToken = jwtTokenProvider.createLoginToken(userId);
-        RefreshToken savedRefreshToken = new RefreshToken(loginToken.getRefreshToken(), userId);
-        refreshTokenRepository.save(savedRefreshToken);
 
-        return loginToken;
+        return jwtTokenProvider.createLoginToken(String.valueOf(userId));
     }
 
     @Transactional
-    public UserTokenResponse reissue(String refreshTokenRequest, String requestHeader) {
-        jwtTokenProvider.validateRefreshToken(refreshTokenRequest);
-        String expiredAccessToken = bearerExtractor.extractAccessToken(requestHeader);
+    public UserTokenResponse reissue(String refreshToken) {
+        jwtTokenProvider.validateToken(refreshToken);
+        String userId = jwtTokenProvider.getUserIdOnToken(refreshToken);
 
-        final RefreshToken refreshToken = refreshTokenRepository.findById(refreshTokenRequest)
-                .orElseThrow(() -> new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN));
-
-        Long userId = jwtTokenProvider.getExpiredSubject(expiredAccessToken);
-
-        if (!refreshToken.getUserId().equals(userId)) {
-            throw new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        if (!jwtTokenProvider.compareRefreshToken(userId, refreshToken)) {
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
         }
 
         String regeneratedAccessToken = jwtTokenProvider.regenerateAccessToken(userId);
         String regeneratedRefreshToken = jwtTokenProvider.regenerateRefreshToken(userId);
 
-        refreshTokenRepository.deleteById(refreshTokenRequest);
-        refreshTokenRepository.save(new RefreshToken(regeneratedRefreshToken, userId));
-
         return new UserTokenResponse(regeneratedAccessToken, regeneratedRefreshToken);
     }
 
     @Transactional
-    public void logout(String refreshToken) {
-        refreshTokenRepository.deleteById(refreshToken);
+    public void logout(Long userId) {
+        jwtTokenProvider.deleteRefreshToken(String.valueOf(userId));
     }
 
     @Transactional
-    public void withdraw(Long userId, String refreshToken) {
+    public void withdraw(Long userId) {
 
         Long providerId = userRetriever.findByUserId(userId).getProviderId();
         kakaoProvider.unLink(providerId);
 
-        refreshTokenRepository.deleteById(refreshToken);
-
-        subscribeRemover.deleteByUserId(userId);
-        userNotificationRemover.deleteByUserId(userId);
         userRemover.deleteByUserId(userId);
+        jwtTokenProvider.deleteRefreshToken(String.valueOf(userId));
     }
 }
