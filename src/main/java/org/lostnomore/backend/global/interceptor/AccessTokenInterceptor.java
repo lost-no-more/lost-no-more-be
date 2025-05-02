@@ -20,7 +20,7 @@ public class AccessTokenInterceptor implements HandlerInterceptor {
         String accessToken = bearerAuthorizationExtractor.extractAccessToken(request.getHeader("Authorization"));
 
         if (accessToken != null) {
-            jwtTokenProvider.validateAccessToken(accessToken);
+            jwtTokenProvider.validateToken(accessToken);
         }
 
         return true;
