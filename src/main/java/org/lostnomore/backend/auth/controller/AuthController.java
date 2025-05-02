@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,39 +26,34 @@ public class AuthController {
     private final CookieProvider cookieProvider;
 
     @GetMapping("/code")
-    public ResponseEntity<ResponseDto> getCodeLink() {
-        String loginLink = authService.getCodeLink();
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(loginLink));
+    public ResponseEntity<ResponseDto<String>> getCodeLink() {
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(authService.getCodeLink()));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseDto> oauth(@RequestParam String code, HttpServletResponse response) {
+    public ResponseEntity<ResponseDto<String>> oauth(@RequestParam String code, HttpServletResponse response) {
         UserTokenResponse userTokenResponse = authService.oauthLogin(code);
-        cookieProvider.createCookie(userTokenResponse.getRefreshToken(), response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokenResponse.getAccessToken()));
+        cookieProvider.createCookie(userTokenResponse.refreshToken(), response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokenResponse.accessToken()));
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<ResponseDto> reissue(@CookieValue("refresh-token") final String refreshToken,
-                                             @RequestHeader("Authorization") final String authorizationHeader,
-                                             HttpServletResponse response) {
-
-        UserTokenResponse userTokenResponse = authService.reissue(refreshToken, authorizationHeader);
-        cookieProvider.createCookie(userTokenResponse.getRefreshToken(), response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokenResponse.getAccessToken()));
+    public ResponseEntity<ResponseDto<String>> reissue(@CookieValue("refresh-token") final String refreshToken,
+                                                       HttpServletResponse response) {
+        UserTokenResponse userTokenResponse = authService.reissue(refreshToken);
+        cookieProvider.createCookie(userTokenResponse.refreshToken(), response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success(userTokenResponse.accessToken()));
     }
 
     @DeleteMapping("/logout")
-    public ResponseEntity<ResponseDto> logout(@LoginUser final Long userId,
-                                       @CookieValue("refresh-token") final String refreshToken) {
-        authService.logout(refreshToken);
+    public ResponseEntity<ResponseDto<Void>> logout(@LoginUser final Long userId) {
+        authService.logout(userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ResponseDto.success());
     }
 
     @DeleteMapping("/withdraw")
-    public ResponseEntity<ResponseDto> withdraw(@LoginUser final Long userId,
-                                                @CookieValue("refresh-token") final String refreshToken) {
-        authService.withdraw(userId, refreshToken);
+    public ResponseEntity<ResponseDto<Void>> withdraw(@LoginUser final Long userId) {
+        authService.withdraw(userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ResponseDto.success());
     }
 }
