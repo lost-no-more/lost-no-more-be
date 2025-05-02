@@ -10,16 +10,14 @@ import org.lostnomore.backend.auth.oauth.kakao.dto.KakaoUserResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class KakaoProvider {
 
     private static final String GRANT_TYPE = "authorization_code";
     private static final String Bearer = "Bearer ";
     private static final String KAKAO_ADMIN_KEY = "KakaoAK ";
     private static final String KAKAO_TARGET_TYPE = "user_id";
-
-
 
     @Value("${oauth2.kakao.code-url}")
     private String codeUrl;
@@ -59,9 +57,7 @@ public class KakaoProvider {
                 code
         );
 
-        KakaoUserResponse userResponse = kakaoApiClient.getUserInformation(Bearer + tokenResponse.accessToken());
-
-        return userResponse;
+        return kakaoApiClient.getUserInformation(Bearer + tokenResponse.accessToken());
     }
 
     public void unLink(Long providerId) {
