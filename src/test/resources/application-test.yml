@@ -1,4 +1,19 @@
 spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=MySQL
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
   data:
     redis:
       host: localhost
@@ -7,29 +22,13 @@ spring:
     uris: ${ELASTICSEARCH_URI:http://localhost:9200}
 
 oauth2:
-  google:
-    client-id: google-client-id
-    client-secret: google-client-secret
-    redirect-url: google-redirect-url
-    scope: email
-    code-url: google-code-url
-    token-url: google-token-url
-    user-info-url: google-user-info-url
-    unlink-url: google-user-unlink-url
   kakao:
-    client-id: kakao-client-id
-    client-secret: kakao-client-secret
-    admin-key: admoin-key
-    redirect-url: kakao-redirect-url
-    scope: account_email
-    code-url: kakao-code-url
-    token-url: kakao-token-url
-    user-info-url: kakao-user-info-url
-    unlink-url: kakao-user-unlink-url
+    client-id: test-client-id
+    client-secret: test-client-secret
+    admin-key: test-admin-key
+    redirect-url: http://localhost:8080/oauth/callback/kakao
 
 security:
   jwt:
     token:
-      secret-key: tetqwfqfoqiwjfqwejklnqwklfjnqwlfknqwklgvnqlgnvlkqwfgnmklqwfgnmlqwlmk
-      access-expire-length: 1200000 #20분
-      refresh-expire-length: 1209600000 #2주
+      secret-key: test-secret-key-for-testing-purposes-only
