@@ -1,7 +1,7 @@
 package org.lostnomore.backend.subscribe.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.lostnomore.backend.global.LoginUser;
+import org.lostnomore.backend.global.resolver.LoginUser;
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.subscribe.dto.request.SubscribeCreateDto;
 import org.lostnomore.backend.subscribe.dto.request.SubscribeUpdateDto;

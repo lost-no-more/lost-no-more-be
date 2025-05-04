@@ -1,7 +1,7 @@
 package org.lostnomore.backend.notification.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.lostnomore.backend.global.LoginUser;
+import org.lostnomore.backend.global.resolver.LoginUser;
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.notification.dto.response.UserNotificationsDto;
 import org.lostnomore.backend.notification.service.NotificationService;

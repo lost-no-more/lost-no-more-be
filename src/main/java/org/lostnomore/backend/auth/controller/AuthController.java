@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.lostnomore.backend.auth.oauth.dto.UserTokenResponse;
 import org.lostnomore.backend.auth.provider.CookieProvider;
 import org.lostnomore.backend.auth.service.AuthService;
-import org.lostnomore.backend.global.LoginUser;
+import org.lostnomore.backend.global.resolver.LoginUser;
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
