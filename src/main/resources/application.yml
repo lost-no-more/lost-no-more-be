@@ -1,3 +1,9 @@
 spring:
   profiles:
-    default: test
+    default: local
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+
