@@ -38,10 +38,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Create application-dev.yml
+      - name: Create application files
         run: |
           mkdir -p ./src/main/resources
-          echo "${{ secrets.APPLICATION_DEV }}" | base64 --decode > ./src/main/resources/application-dev.yml
+          echo "${{ secrets.APPLICATION }}"  > ./src/main/resources/application.yml
+          echo "${{ secrets.APPLICATION_LOCAL }}"  > ./src/main/resources/application-local.yml
+          echo "${{ secrets.APPLICATION_DEV }}"  > ./src/main/resources/application-dev.yml
         shell: bash
 
       - name: Set Environment for CI
