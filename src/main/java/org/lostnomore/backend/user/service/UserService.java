@@ -1,6 +1,8 @@
 package org.lostnomore.backend.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.lostnomore.backend.global.exception.BusinessException;
+import org.lostnomore.backend.global.exception.code.UserErrorCode;
 import org.lostnomore.backend.user.domain.SocialType;
 import org.lostnomore.backend.user.domain.User;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,9 @@ public class UserService {
     }
 
     private String getName(String email) {
+        if (email == null || !email.contains("@")) {
+            throw new BusinessException(UserErrorCode.INVALID_EMAIL);
+        }
         return email.split("@")[0];
     }
-
 }
