@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 테스트 환경에서는 로깅 완전 비활성화 -->
+    <root level="OFF"/>
+</configuration>

@@ -21,6 +21,14 @@ spring:
   elasticsearch:
     uris: ${ELASTICSEARCH_URI:http://localhost:9200}
 
+logging:
+  level:
+    root: OFF
+    org.springframework: OFF
+    org.lostnomore: OFF
+  file:
+    name:
+
 oauth2:
   kakao:
     client-id: test-client-id
