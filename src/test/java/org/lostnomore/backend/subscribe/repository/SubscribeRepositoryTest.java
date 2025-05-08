@@ -45,7 +45,7 @@ class SubscribeRepositoryTest extends RepositoryTest {
     @BeforeEach
     void setUp() {
         testUser = userRepository.save(
-                User.builder().name("테스트 유저").email("test@gmail.com").socialType(SocialType.KAKAO).providerId("testProviderId").build()
+                User.builder().name("테스트 유저").email("test@gmail.com").providerId(1L).build()
         );
         testCategory = categoryRepository.save(Category.builder().name("지갑").build());
         testLocation = locationRepository.save(
