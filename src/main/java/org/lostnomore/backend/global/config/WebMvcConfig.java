@@ -27,7 +27,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/auth/login",
                         "/test/**",
                         "/items/search/**",
-                        "/items/count"
+                        "/items/count",
+                        "/actuator/**"
                 );
     }
 
