@@ -31,6 +31,8 @@ logging:
     org.hibernate: DEBUG
     org.springframework: DEBUG
     org.lostnomore: DEBUG
+  discord:
+    webhook-url: webhook-url
 
 oauth2:
   kakao:
