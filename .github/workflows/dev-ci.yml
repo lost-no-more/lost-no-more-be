@@ -10,16 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
-    services:
-      elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1
-        ports:
-          - 9200:9200
-        env:
-          discovery.type: single-node
-          ES_JAVA_OPTS: "-Xms1g -Xmx1g"
-          xpack.security.enabled: "false"
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,28 +40,28 @@ jobs:
         run: echo "ELASTICSEARCH_URI=http://localhost:9200" >> $GITHUB_ENV
         shell: bash
 
+      # Elasticsearch Docker 이미지 빌드
+      - name: Build Elasticsearch Image with Nori
+        run: |
+          docker build -t elasticsearch-with-nori:8.17.1 -f Dockerfile.elasticsearch .
+        shell: bash
+
+      # Elasticsearch 컨테이너 실행
+      - name: Start Elasticsearch
+        run: |
+          docker run -d --name elasticsearch-container \
+            -p 9200:9200 \
+            -e "discovery.type=single-node" \
+            -e "ES_JAVA_OPTS=-Xms1g -Xmx1g" \
+            -e "xpack.security.enabled=false" \
+            elasticsearch-with-nori:8.17.1
+        shell: bash
+
       - name: Wait for Elasticsearch
         run: |
           echo "Waiting for Elasticsearch to be available..."
           timeout 60s bash -c 'until curl -s http://localhost:9200 > /dev/null; do sleep 2; echo "Still waiting..."; done'
           echo "Elasticsearch is up!"
-        shell: bash
-
-      - name: Install Elasticsearch Nori Plugin
-        run: |
-          echo "Installing Nori plugin..."
-          until curl -s http://localhost:9200 > /dev/null; do sleep 2; done
-          docker exec $(docker ps -q --filter ancestor=docker.elastic.co/elasticsearch/elasticsearch:8.17.1) \
-          bin/elasticsearch-plugin install analysis-nori
-          echo "Restarting Elasticsearch..."
-          docker restart $(docker ps -q --filter ancestor=docker.elastic.co/elasticsearch/elasticsearch:8.17.1)
-        shell: bash
-
-      - name: Wait for Elasticsearch after Restart
-        run: |
-          echo "Waiting for Elasticsearch to be available after restart..."
-          timeout 60s bash -c 'until curl -s http://localhost:9200 > /dev/null; do sleep 2; echo "Still waiting..."; done'
-          echo "Elasticsearch is up after restart!"
         shell: bash
 
       - name: Create Elasticsearch Index
