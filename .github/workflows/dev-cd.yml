@@ -43,13 +43,21 @@ jobs:
           username: ${{ secrets.DOCKER_LOGIN_USERNAME }}
           password: ${{ secrets.DOCKER_LOGIN_ACCESSTOKEN }}
 
-      - name: Build and Push Docker Image
+      - name: Build and Push Application Docker Image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile-dev
           push: true
           tags: ${{ secrets.DOCKER_LOGIN_USERNAME }}/${{ secrets.DEV_REPONAME }}:latest
+
+      - name: Build and Push Elasticsearch Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile.elasticsearch
+          push: true
+          tags: ${{ secrets.DOCKER_LOGIN_USERNAME }}/elasticsearch-with-nori:8.17.1
 
   cd:
     needs: ci
