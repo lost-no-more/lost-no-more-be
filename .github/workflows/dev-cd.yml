@@ -64,4 +64,5 @@ jobs:
           key: ${{ secrets.DEV_EC2_KEY }}
           script: |
             cd ~
+            chmod +x ./deploy.sh
             ./deploy.sh
