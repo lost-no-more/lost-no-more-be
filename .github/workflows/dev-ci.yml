@@ -40,13 +40,11 @@ jobs:
         run: echo "ELASTICSEARCH_URI=http://localhost:9200" >> $GITHUB_ENV
         shell: bash
 
-      # Elasticsearch Docker 이미지 빌드
       - name: Build Elasticsearch Image with Nori
         run: |
           docker build -t elasticsearch-with-nori:8.17.1 -f Dockerfile.elasticsearch .
         shell: bash
 
-      # Elasticsearch 컨테이너 실행
       - name: Start Elasticsearch
         run: |
           docker run -d --name elasticsearch-container \
