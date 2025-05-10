@@ -16,7 +16,7 @@ public class NoriAnalyzerService {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private static final String ELASTICSEARCH_URL = "http://localhost:9200/lost_item/_analyze";
+    private static final String ELASTICSEARCH_URL = "http://lost-elasticsearch:9200/lost_item/_analyze";
 
     public NoriAnalyzerService(RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
