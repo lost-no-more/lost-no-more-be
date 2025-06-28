@@ -13,7 +13,6 @@ public class CookieProvider {
     private static final int REFRESH_TOKEN_EXPIRATION_DAYS = 14;
 
     public void createCookie(String refreshToken, HttpServletResponse response) {
-
         ResponseCookie cookie = ResponseCookie.from("refresh-token", refreshToken)
                 .maxAge(REFRESH_TOKEN_EXPIRATION_DAYS * DAYS_IN_MILLISECONDS)
                 .sameSite("None")
