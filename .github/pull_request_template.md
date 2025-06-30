@@ -9,6 +9,3 @@
 ## Uncompleted Tasks 😅
 [//]: # (없다면 N/A)
 - [ ] Task1
-
-## To Reviewers 📢
-[//]: # (reviewer가 알면 좋은 내용들)
