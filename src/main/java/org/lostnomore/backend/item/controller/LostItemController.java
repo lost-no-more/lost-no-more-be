@@ -52,12 +52,15 @@ public class LostItemController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String region
     ) {
+        System.out.println("========== 컨트롤러 진입 성공 ==========");
+        log.info("모든 파라미터 optional로 설정 후 테스트");
+
+        if (date_start == null || date_end == null) {
+            System.out.println("error");
+        }
+
         log.info("date_start: {}", date_start);
         log.info("date_end: {}", date_end);
-        log.info("top_left_lat: {}", top_left_lat);
-        log.info("top_left_lon: {}", top_left_lon);
-        log.info("bottom_right_lon: {}", bottom_right_lon);
-        log.info("bottom_right_lon: {}", bottom_right_lon);
 
         return ResponseEntity.ok(ResponseDto.success(lostItemService.searchLostItems(
                 date_start, date_end,
