@@ -28,12 +28,15 @@ public class LostItem extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")
     private Location location;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @Column(name = "atc_id",unique = true)
+    private String atcId;
 
     @Column(name = "color")
     private String color;
@@ -48,12 +51,15 @@ public class LostItem extends BaseEntity {
     private LocalDate date;
 
     @Builder
-    public LostItem(Location location, Category category, String color, String image, String name, LocalDate date) {
+    public LostItem(Category category, Location location, String atcId, String color, String image, String name,
+        LocalDate date) {
         this.location = location;
         this.category = category;
+        this.atcId = atcId;
         this.color = color;
         this.image = image;
         this.name = name;
         this.date = date;
     }
 }
+
