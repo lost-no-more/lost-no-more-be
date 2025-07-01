@@ -22,7 +22,7 @@ public class SubscribeController {
 
     private final SubscribeService subscribeService;
 
-    @GetMapping("items/recent")
+    @GetMapping("/items/recent")
     public ResponseEntity<ResponseDto<RecentItemsDto>> getRecentItems (
             @LoginUser final Long userId
     ) {
