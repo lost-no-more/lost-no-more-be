@@ -1,6 +1,8 @@
 package org.lostnomore.backend.item.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.item.dto.request.LostItemIdsDto;
 import org.lostnomore.backend.item.dto.response.*;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class LostItemController {
@@ -49,6 +52,13 @@ public class LostItemController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String region
     ) {
+        log.info("date_start: {}", date_start);
+        log.info("date_end: {}", date_end);
+        log.info("top_left_lat: {}", top_left_lat);
+        log.info("top_left_lon: {}", top_left_lon);
+        log.info("bottom_right_lon: {}", bottom_right_lon);
+        log.info("bottom_right_lon: {}", bottom_right_lon);
+
         return ResponseEntity.ok(ResponseDto.success(lostItemService.searchLostItems(
                 date_start, date_end,
                 top_left_lat, top_left_lon,
