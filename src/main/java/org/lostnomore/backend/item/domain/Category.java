@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "category",
     indexes = {
-        @Index(name = "idx_name", columnList = "name", unique = true)
+        @Index(name = "idx_category_name", columnList = "name", unique = true)
     })
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
