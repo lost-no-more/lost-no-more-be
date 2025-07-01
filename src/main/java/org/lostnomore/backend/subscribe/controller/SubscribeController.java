@@ -1,6 +1,8 @@
 package org.lostnomore.backend.subscribe.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.lostnomore.backend.global.resolver.LoginUser;
 import org.lostnomore.backend.global.dto.ResponseDto;
 import org.lostnomore.backend.subscribe.dto.request.SubscribeCreateDto;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class SubscribeController {
@@ -26,6 +29,7 @@ public class SubscribeController {
     public ResponseEntity<ResponseDto<RecentItemsDto>> getRecentItems (
             @LoginUser final Long userId
     ) {
+        log.info("check1");
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(subscribeService.getRecentItems(userId)));
     }
 

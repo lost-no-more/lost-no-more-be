@@ -1,6 +1,8 @@
 package org.lostnomore.backend.subscribe.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.LocationErrorCode;
 import org.lostnomore.backend.global.exception.code.SubscribeErrorCode;
@@ -34,6 +36,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubscribeService {
@@ -54,7 +57,9 @@ public class SubscribeService {
         LocalDate dateEnd = LocalDate.now().minusDays(1);
         LocalDate dateStart = dateEnd.minusDays(7);
 
+        log.info("check2");
         List<Subscribe> subscribes = subscribeRetriever.findByUserId(userId);
+        log.info("check3");
         Set<Long> lostItemIds = searchLostItemIds(subscribes, dateStart, dateEnd, 9);
 
         if (lostItemIds.isEmpty()) {
