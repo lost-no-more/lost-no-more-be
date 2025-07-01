@@ -6,3 +6,9 @@ spring:
       hibernate:
         format_sql: true
         show_sql: true
+
+logging:
+  level:
+    root: INFO
+    com.yourpackage: DEBUG
+    web: DEBUG
