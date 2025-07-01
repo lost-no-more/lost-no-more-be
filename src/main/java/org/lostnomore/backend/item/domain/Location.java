@@ -1,10 +1,13 @@
 package org.lostnomore.backend.item.domain;
 
+import org.lostnomore.backend.global.domain.BaseEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -12,10 +15,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@Table(name = "location")
+@Table(name = "location",
+    indexes = {
+        @Index(name = "idx_name", columnList = "name", unique = true)
+    })
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Location {
+public class Location extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +34,7 @@ public class Location {
     @Column(name = "latitude", nullable = false)
     private Double latitude;
 
-    @Column(name = "longtitude", nullable = false)
+    @Column(name = "longitude", nullable = false)
     private Double longitude;
 
     @Column(name = "region", nullable = false)
@@ -42,3 +48,4 @@ public class Location {
         this.region = region;
     }
 }
+
