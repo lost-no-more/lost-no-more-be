@@ -24,7 +24,7 @@ public class LostItemController {
 
     private final LostItemService lostItemService;
 
-    @GetMapping("items/count")
+    @GetMapping("/items/count")
     public ResponseEntity<ResponseDto<ItemsCountDto>> getItemsCount () {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(lostItemService.getItemsCount()));
     }
