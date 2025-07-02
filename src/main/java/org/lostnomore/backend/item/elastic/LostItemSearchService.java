@@ -213,16 +213,22 @@ public class LostItemSearchService {
             );
 
             System.out.println("8. NativeQuery 빌드 중...");
+
+            // 핵심 수정: Pageable.unpaged() 제거
+            int pageSize = (size != null && size > 0) ? size : 1000; // 기본값 1000
+            System.out.println("페이지 크기 설정: " + pageSize);
+
             NativeQuery searchQuery = NativeQuery.builder()
                 .withQuery(boolQuery)
                 .withSort(sortOptions)
-                .withPageable(size != null ? PageRequest.of(0, size) : Pageable.unpaged())
+                .withPageable(PageRequest.of(0, pageSize)) // unpaged 대신 고정 크기
                 .build();
             System.out.println("NativeQuery 빌드 완료");
 
             // 디버깅을 위한 쿼리 출력 (선택사항)
             System.out.println("생성된 쿼리 정보:");
             System.out.println("Query toString: " + boolQuery.toString());
+            System.out.println("Page size: " + pageSize);
 
             System.out.println("9. Elasticsearch 검색 실행 중...");
             SearchHits<LostItemDocument> result = elasticsearchOperations.search(searchQuery, LostItemDocument.class);
