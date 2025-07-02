@@ -1,24 +1,27 @@
 package org.lostnomore.backend.item.controller;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-import org.lostnomore.backend.global.dto.ResponseDto;
-import org.lostnomore.backend.item.dto.request.LostItemIdsDto;
-import org.lostnomore.backend.item.dto.response.*;
-import org.lostnomore.backend.item.dto.request.LostItemCreateDto;
-import org.lostnomore.backend.item.service.LostItemService;
-import org.springframework.http.HttpStatus;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
+
+import org.lostnomore.backend.global.dto.ResponseDto;
+import org.lostnomore.backend.item.dto.request.LostItemCreateDto;
+import org.lostnomore.backend.item.dto.response.ItemsCountDto;
+import org.lostnomore.backend.item.dto.response.LostItemDto;
+import org.lostnomore.backend.item.dto.response.LostItemsListDto;
+import org.lostnomore.backend.item.dto.response.LostItemsSearchDto;
+import org.lostnomore.backend.item.service.LostItemService;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -52,16 +55,6 @@ public class LostItemController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String region
     ) {
-        System.out.println("========== 컨트롤러 진입 성공 ==========");
-        log.info("모든 파라미터 optional로 설정 후 테스트");
-
-        if (date_start == null || date_end == null) {
-            System.out.println("error");
-        }
-
-        log.info("date_start: {}", date_start);
-        log.info("date_end: {}", date_end);
-
         return ResponseEntity.ok(ResponseDto.success(lostItemService.searchLostItems(
                 date_start, date_end,
                 top_left_lat, top_left_lon,
