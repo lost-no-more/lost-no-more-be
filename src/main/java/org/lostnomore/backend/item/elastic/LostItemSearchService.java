@@ -153,25 +153,39 @@ public class LostItemSearchService {
                 System.out.println("지역 필터 없음");
             }
 
-            // 위치 필터
+            // 위치 필터 (수정된 부분)
             System.out.println("5. 위치 필터 확인...");
             if (topLeftLat != null && topLeftLon != null && bottomRightLat != null && bottomRightLon != null) {
                 System.out.println("위치 쿼리 추가 중...");
-                GeoBoundingBoxQuery geoQuery = GeoBoundingBoxQuery.of(g -> g
-                    .field("location")
-                    .boundingBox(
-                        GeoBounds.of(outer -> outer.tlbr(b -> b
-                            .topLeft(GeoLocation.of(loc ->
-                                loc.text(topLeftLat + "," + topLeftLon)
-                            ))
-                            .bottomRight(GeoLocation.of(loc ->
-                                loc.text(bottomRightLat + "," + bottomRightLon)
-                            ))
-                        ))
-                    )
-                );
-                mustQueries.add(geoQuery._toQuery());
-                System.out.println("위치 쿼리 추가 완료");
+                System.out.println("검색 범위 - Top-Left: " + topLeftLat + "," + topLeftLon);
+                System.out.println("검색 범위 - Bottom-Right: " + bottomRightLat + "," + bottomRightLon);
+
+                try {
+                    GeoBoundingBoxQuery geoQuery = GeoBoundingBoxQuery.of(g -> g
+                        .field("location")
+                        .boundingBox(b -> b
+                            .tlbr(tlbr -> tlbr
+                                .topLeft(tl -> tl.latlon(ll -> ll
+                                    .lat(topLeftLat)
+                                    .lon(topLeftLon)
+                                ))
+                                .bottomRight(br -> br.latlon(ll -> ll
+                                    .lat(bottomRightLat)
+                                    .lon(bottomRightLon)
+                                ))
+                            )
+                        )
+                    );
+
+                    mustQueries.add(geoQuery._toQuery());
+                    System.out.println("위치 쿼리 추가 완료");
+
+                } catch (Exception geoEx) {
+                    System.out.println("위치 쿼리 생성 실패: " + geoEx.getMessage());
+                    geoEx.printStackTrace();
+                    // 위치 쿼리 실패 시에도 다른 검색 조건으로 계속 진행
+                    System.out.println("위치 쿼리를 제외하고 검색을 계속 진행합니다.");
+                }
             } else {
                 System.out.println("위치 필터 없음");
             }
@@ -205,6 +219,10 @@ public class LostItemSearchService {
                 .withPageable(size != null ? PageRequest.of(0, size) : Pageable.unpaged())
                 .build();
             System.out.println("NativeQuery 빌드 완료");
+
+            // 디버깅을 위한 쿼리 출력 (선택사항)
+            System.out.println("생성된 쿼리 정보:");
+            System.out.println("Query toString: " + boolQuery.toString());
 
             System.out.println("9. Elasticsearch 검색 실행 중...");
             SearchHits<LostItemDocument> result = elasticsearchOperations.search(searchQuery, LostItemDocument.class);
