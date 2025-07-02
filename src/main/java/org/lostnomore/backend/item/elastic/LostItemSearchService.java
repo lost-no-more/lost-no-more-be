@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch._types.GeoBounds;
 import co.elastic.clients.elasticsearch._types.GeoLocation;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.mapping.FieldType;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 
 import lombok.RequiredArgsConstructor;
@@ -153,97 +154,101 @@ public class LostItemSearchService {
                 System.out.println("지역 필터 없음");
             }
 
-            // === 단계별 테스트 시작 ===
-            System.out.println("=== 단계별 테스트 시작 ===");
+            // 위치 필터 (수정된 부분)
+            System.out.println("5. 위치 필터 확인...");
+            if (topLeftLat != null && topLeftLon != null && bottomRightLat != null && bottomRightLon != null) {
+                System.out.println("위치 쿼리 추가 중...");
+                System.out.println("검색 범위 - Top-Left: " + topLeftLat + "," + topLeftLon);
+                System.out.println("검색 범위 - Bottom-Right: " + bottomRightLat + "," + bottomRightLon);
 
-            // 1단계: 날짜 + 카테고리만 (위치 쿼리 제외)
-            System.out.println("1단계 테스트: 날짜 + 카테고리만 (위치 제외)");
-            try {
-                BoolQuery testBoolQuery = new BoolQuery.Builder()
-                    .must(mustQueries) // 현재까지의 쿼리들 (위치 제외)
-                    .build();
-
-                NativeQuery testQuery = NativeQuery.builder()
-                    .withQuery(testBoolQuery._toQuery())
-                    .withPageable(PageRequest.of(0, 10)) // 작은 크기로 테스트
-                    .build();
-
-                SearchHits<LostItemDocument> testResult = elasticsearchOperations.search(testQuery, LostItemDocument.class);
-                System.out.println("1단계 성공! 결과 수: " + testResult.getTotalHits());
-
-                // 1단계가 성공하면 정렬 추가 테스트
-                System.out.println("2단계 테스트: 정렬 추가");
-                List<SortOptions> sortOptions = List.of(
-                    SortOptions.of(s -> s.field(f -> f.field("date").order(SortOrder.Desc))),
-                    SortOptions.of(s -> s.field(f -> f.field("id").order(SortOrder.Desc)))
-                );
-
-                NativeQuery testQueryWithSort = NativeQuery.builder()
-                    .withQuery(testBoolQuery._toQuery())
-                    .withSort(sortOptions) // 정렬 추가
-                    .withPageable(PageRequest.of(0, 10))
-                    .build();
-
-                SearchHits<LostItemDocument> testResultWithSort = elasticsearchOperations.search(testQueryWithSort, LostItemDocument.class);
-                System.out.println("2단계 성공! 정렬 포함 결과 수: " + testResultWithSort.getTotalHits());
-
-                // 여기까지 성공하면 위치 쿼리가 문제임
-                // 위치 쿼리 없이 최종 검색 실행
-                int pageSize = (size != null && size > 0) ? size : 1000;
-
-                BoolQuery.Builder finalBoolQueryBuilder = new BoolQuery.Builder()
-                    .must(mustQueries);
-
-                if (hasKeyword) {
-                    finalBoolQueryBuilder.should(shouldQueries);
-                    finalBoolQueryBuilder.minimumShouldMatch("1");
-                }
-
-                Query finalBoolQuery = finalBoolQueryBuilder.build()._toQuery();
-
-                NativeQuery finalQuery = NativeQuery.builder()
-                    .withQuery(finalBoolQuery)
-                    .withSort(sortOptions)
-                    .withPageable(PageRequest.of(0, pageSize))
-                    .build();
-
-                SearchHits<LostItemDocument> finalResult = elasticsearchOperations.search(finalQuery, LostItemDocument.class);
-
-                System.out.println("========== 검색 성공 (위치 제외)! ==========");
-                System.out.println("총 결과 수: " + finalResult.getTotalHits());
-                System.out.println("반환된 문서 수: " + finalResult.getSearchHits().size());
-                System.out.println("경고: 위치 쿼리는 제외되었습니다.");
-                System.out.println("=====================================");
-
-                return finalResult;
-
-            } catch (Exception e1) {
-                System.out.println("1단계 실패: " + e1.getMessage());
-
-                // 1단계도 실패하면 더 간단한 테스트
-                System.out.println("기본 테스트: 날짜만");
                 try {
-                    List<Query> dateOnlyQueries = new ArrayList<>();
-                    dateOnlyQueries.add(dateRangeQuery._toQuery());
+                    GeoBoundingBoxQuery geoQuery = GeoBoundingBoxQuery.of(g -> g
+                        .field("location")
+                        .boundingBox(b -> b
+                            .tlbr(tlbr -> tlbr
+                                .topLeft(tl -> tl.latlon(ll -> ll
+                                    .lat(topLeftLat)
+                                    .lon(topLeftLon)
+                                ))
+                                .bottomRight(br -> br.latlon(ll -> ll
+                                    .lat(bottomRightLat)
+                                    .lon(bottomRightLon)
+                                ))
+                            )
+                        )
+                    );
 
-                    BoolQuery simpleBoolQuery = new BoolQuery.Builder()
-                        .must(dateOnlyQueries)
-                        .build();
+                    mustQueries.add(geoQuery._toQuery());
+                    System.out.println("위치 쿼리 추가 완료");
 
-                    NativeQuery simpleQuery = NativeQuery.builder()
-                        .withQuery(simpleBoolQuery._toQuery())
-                        .withPageable(PageRequest.of(0, 10))
-                        .build();
-
-                    SearchHits<LostItemDocument> simpleResult = elasticsearchOperations.search(simpleQuery, LostItemDocument.class);
-                    System.out.println("기본 테스트 성공! 결과 수: " + simpleResult.getTotalHits());
-                    return simpleResult;
-
-                } catch (Exception e2) {
-                    System.out.println("기본 테스트도 실패: " + e2.getMessage());
-                    throw e2;
+                } catch (Exception geoEx) {
+                    System.out.println("위치 쿼리 생성 실패: " + geoEx.getMessage());
+                    geoEx.printStackTrace();
+                    // 위치 쿼리 실패 시에도 다른 검색 조건으로 계속 진행
+                    System.out.println("위치 쿼리를 제외하고 검색을 계속 진행합니다.");
                 }
+            } else {
+                System.out.println("위치 필터 없음");
             }
+
+            System.out.println("6. Bool 쿼리 빌드 중...");
+            System.out.println("Must 쿼리 개수: " + mustQueries.size());
+            System.out.println("Should 쿼리 개수: " + shouldQueries.size());
+
+            BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder()
+                .must(mustQueries); // 필수 조건 추가
+
+            if (hasKeyword) {
+                boolQueryBuilder.should(shouldQueries);
+                boolQueryBuilder.minimumShouldMatch("1");
+                System.out.println("Should 쿼리와 minimumShouldMatch 설정 완료");
+            }
+
+            Query boolQuery = boolQueryBuilder.build()._toQuery();
+            System.out.println("Bool 쿼리 빌드 완료");
+
+            System.out.println("7. 정렬 옵션 설정 중...");
+            // 수정된 정렬: unmapped_type 옵션 추가
+            List<SortOptions> sortOptions = List.of(
+                SortOptions.of(s -> s.field(f -> f
+                    .field("date")
+                    .order(SortOrder.Desc)
+                    .unmappedType(FieldType.Date)
+                )),
+                SortOptions.of(s -> s.field(f -> f
+                    .field("id")
+                    .order(SortOrder.Desc)
+                    .unmappedType(FieldType.Long)
+                ))
+            );
+
+            System.out.println("8. NativeQuery 빌드 중...");
+
+            // 페이지 크기 설정
+            int pageSize = (size != null && size > 0) ? size : 1000; // 기본값 1000
+            System.out.println("페이지 크기 설정: " + pageSize);
+
+            NativeQuery searchQuery = NativeQuery.builder()
+                .withQuery(boolQuery)
+                .withSort(sortOptions)
+                .withPageable(PageRequest.of(0, pageSize))
+                .build();
+            System.out.println("NativeQuery 빌드 완료");
+
+            // 디버깅을 위한 쿼리 출력
+            System.out.println("생성된 쿼리 정보:");
+            System.out.println("Query toString: " + boolQuery.toString());
+            System.out.println("Page size: " + pageSize);
+
+            System.out.println("9. Elasticsearch 검색 실행 중...");
+            SearchHits<LostItemDocument> result = elasticsearchOperations.search(searchQuery, LostItemDocument.class);
+
+            System.out.println("========== 검색 성공! ==========");
+            System.out.println("총 결과 수: " + result.getTotalHits());
+            System.out.println("반환된 문서 수: " + result.getSearchHits().size());
+            System.out.println("================================");
+
+            return result;
 
         } catch (Exception e) {
             System.out.println("========== 검색 실패! ==========");
