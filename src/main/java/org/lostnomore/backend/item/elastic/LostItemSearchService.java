@@ -32,9 +32,6 @@ public class LostItemSearchService {
     private final ElasticsearchOperations elasticsearchOperations;
     private final NoriAnalyzerService noriAnalyzerService;
 
-    @Value("${spring.elasticsearch.uris:NOT_SET}")
-    private String elasticsearchUris;
-
     @Transactional(readOnly = true)
     public SearchHits<LostItemDocument> searchLostItems(
         LocalDate dateStart,
@@ -50,30 +47,6 @@ public class LostItemSearchService {
     ) {
         List<Query> mustQueries = new ArrayList<>();
         List<Query> shouldQueries = new ArrayList<>();
-
-        // === Elasticsearch 연결 정보 확인 ===
-        log.info("=== Elasticsearch 연결 정보 디버깅 ===");
-        log.info("설정된 Elasticsearch URI: {}", elasticsearchUris);
-        log.info("SPRING_ELASTICSEARCH_URIS 환경변수: {}", System.getenv("SPRING_ELASTICSEARCH_URIS"));
-        log.info("ElasticsearchOperations 클래스: {}", elasticsearchOperations.getClass().getName());
-
-        // ElasticsearchTemplate 정보 출력
-        if (elasticsearchOperations instanceof ElasticsearchTemplate) {
-            ElasticsearchTemplate template = (ElasticsearchTemplate) elasticsearchOperations;
-            log.info("ElasticsearchTemplate 정보: {}", template.toString());
-        }
-
-        // 시스템 프로퍼티 확인
-        log.info("spring.elasticsearch.uris 시스템 프로퍼티: {}", System.getProperty("spring.elasticsearch.uris"));
-        log.info("현재 활성 프로파일: {}", System.getProperty("spring.profiles.active"));
-
-        log.info("=== 검색 파라미터 ===");
-        log.info("categoryId: {}", categoryId);
-        log.info("region: {}", region);
-        log.info("keyword: {}", keyword);
-        log.info("dateStart: {}, dateEnd: {}", dateStart, dateEnd);
-        log.info("지리적 범위: topLeft({}, {}), bottomRight({}, {})",
-            topLeftLat, topLeftLon, bottomRightLat, bottomRightLon);
 
         // 날짜 범위
         RangeQuery dateRangeQuery = new RangeQuery.Builder()
