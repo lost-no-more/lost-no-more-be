@@ -27,7 +27,7 @@ public class LostItemSearchService {
     private final ElasticsearchOperations elasticsearchOperations;
     private final NoriAnalyzerService noriAnalyzerService;
 
-    // @Transactional(readOnly = true) // 트랜잭션 제거
+    @Transactional(readOnly = true)
     public SearchHits<LostItemDocument> searchLostItems(
         LocalDate dateStart,
         LocalDate dateEnd,
@@ -40,225 +40,129 @@ public class LostItemSearchService {
         String region,
         Integer size
     ) {
+        List<Query> mustQueries = new ArrayList<>();
+        List<Query> shouldQueries = new ArrayList<>();
 
-        System.out.println("========== 검색 시작 ==========");
-        System.out.println("파라미터들:");
-        System.out.println("dateStart: " + dateStart);
-        System.out.println("dateEnd: " + dateEnd);
-        System.out.println("keyword: " + keyword);
-        System.out.println("categoryId: " + categoryId);
-        System.out.println("region: " + region);
-        System.out.println("topLeftLat: " + topLeftLat);
-        System.out.println("topLeftLon: " + topLeftLon);
-        System.out.println("bottomRightLat: " + bottomRightLat);
-        System.out.println("bottomRightLon: " + bottomRightLon);
-        System.out.println("size: " + size);
+        // 날짜 범위
+        RangeQuery dateRangeQuery = new RangeQuery.Builder()
+            .date(d -> d
+                .field("date")
+                .gte(dateStart.toString())
+                .lte(dateEnd.toString())
+            )
+            .build();
+        mustQueries.add(dateRangeQuery._toQuery());
 
-        try {
-            List<Query> mustQueries = new ArrayList<>();
-            List<Query> shouldQueries = new ArrayList<>();
+        // 키워드 검색
+        boolean hasKeyword = (keyword != null && !keyword.isBlank());
 
-            System.out.println("1. 날짜 범위 쿼리 생성 중...");
-            // 날짜 범위
-            RangeQuery dateRangeQuery = new RangeQuery.Builder()
-                .date(d -> d
-                    .field("date")
-                    .gte(dateStart.toString())
-                    .lte(dateEnd.toString())
-                )
-                .build();
-            mustQueries.add(dateRangeQuery._toQuery());
-            System.out.println("날짜 범위 쿼리 생성 완료");
+        if (hasKeyword) {
+            List<String> tokens = noriAnalyzerService.analyzeKeyword(keyword);
 
-            // 키워드 검색
-            boolean hasKeyword = (keyword != null && !keyword.isBlank());
-            System.out.println("2. 키워드 검색 여부: " + hasKeyword);
-
-            if (hasKeyword) {
-                System.out.println("키워드 분석 시작...");
-                List<String> tokens = noriAnalyzerService.analyzeKeyword(keyword);
-                System.out.println("분석된 토큰들: " + tokens);
-
-                if (tokens.size() > 1) {
-                    System.out.println("다중 토큰 처리 중...");
-                    // 다중 토큰일 경우 각 토큰을 전부 must로 추가
-                    for (String token : tokens) {
-                        MatchQuery multiTokenMatch = MatchQuery.of(m -> m
-                            .field("name.nori")
-                            .query(token)
-                        );
-                        mustQueries.add(multiTokenMatch._toQuery());
-                        System.out.println("토큰 추가: " + token);
-                    }
-                } else {
-                    System.out.println("단일 토큰 처리 중...");
-                    // 단일 토큰일 경우 기존처럼 should에 추가
-                    MatchQuery singleTokenMatch = MatchQuery.of(m -> m
+            if (tokens.size() > 1) {
+                // 다중 토큰일 경우 각 토큰을 전부 must로 추가
+                for (String token : tokens) {
+                    MatchQuery multiTokenMatch = MatchQuery.of(m -> m
                         .field("name.nori")
-                        .query(keyword)
+                        .query(token)
                     );
-                    shouldQueries.add(singleTokenMatch._toQuery());
-                    System.out.println("단일 토큰 should 쿼리 추가");
+                    mustQueries.add(multiTokenMatch._toQuery());
                 }
-
-                System.out.println("NGram 쿼리 추가 중...");
-                // Edge NGram 기반
-                MatchQuery ngramQuery = MatchQuery.of(m -> m
-                    .field("name.ngram")
-                    .query(keyword)
-                );
-                shouldQueries.add(ngramQuery._toQuery());
-
-                System.out.println("Phrase Prefix 쿼리 추가 중...");
-                // 접두사 기반 검색
-                MatchPhrasePrefixQuery phrasePrefix = MatchPhrasePrefixQuery.of(m -> m
+            } else {
+                MatchQuery singleTokenMatch = MatchQuery.of(m -> m
                     .field("name.nori")
                     .query(keyword)
                 );
-                shouldQueries.add(phrasePrefix._toQuery());
-
-                System.out.println("Fuzzy 쿼리 추가 중...");
-                // Fuzzy 철자 오류 보정
-                FuzzyQuery fuzzyQuery = FuzzyQuery.of(f -> f
-                    .field("name")
-                    .value(keyword)
-                    .fuzziness("AUTO")
-                );
-                shouldQueries.add(fuzzyQuery._toQuery());
-                System.out.println("키워드 관련 쿼리들 모두 생성 완료");
+                shouldQueries.add(singleTokenMatch._toQuery());
             }
 
-            // 카테고리
-            System.out.println("3. 카테고리 필터 확인...");
-            if (categoryId != null) {
-                System.out.println("카테고리 쿼리 추가: " + categoryId);
-                TermQuery termQuery = TermQuery.of(t -> t
-                    .field("categoryId")
-                    .value(categoryId)
-                );
-                mustQueries.add(termQuery._toQuery());
-            } else {
-                System.out.println("카테고리 필터 없음");
-            }
-
-            // 지역
-            System.out.println("4. 지역 필터 확인...");
-            if (region != null && !region.isBlank()) {
-                System.out.println("지역 쿼리 추가: " + region);
-                MatchQuery regionQuery = MatchQuery.of(m -> m
-                    .field("region")
-                    .query(region)
-                );
-                mustQueries.add(regionQuery._toQuery());
-            } else {
-                System.out.println("지역 필터 없음");
-            }
-
-            // 위치 필터 (수정된 부분)
-            System.out.println("5. 위치 필터 확인...");
-            if (topLeftLat != null && topLeftLon != null && bottomRightLat != null && bottomRightLon != null) {
-                System.out.println("위치 쿼리 추가 중...");
-                System.out.println("검색 범위 - Top-Left: " + topLeftLat + "," + topLeftLon);
-                System.out.println("검색 범위 - Bottom-Right: " + bottomRightLat + "," + bottomRightLon);
-
-                try {
-                    GeoBoundingBoxQuery geoQuery = GeoBoundingBoxQuery.of(g -> g
-                        .field("location")
-                        .boundingBox(b -> b
-                            .tlbr(tlbr -> tlbr
-                                .topLeft(tl -> tl.latlon(ll -> ll
-                                    .lat(topLeftLat)
-                                    .lon(topLeftLon)
-                                ))
-                                .bottomRight(br -> br.latlon(ll -> ll
-                                    .lat(bottomRightLat)
-                                    .lon(bottomRightLon)
-                                ))
-                            )
-                        )
-                    );
-
-                    mustQueries.add(geoQuery._toQuery());
-                    System.out.println("위치 쿼리 추가 완료");
-
-                } catch (Exception geoEx) {
-                    System.out.println("위치 쿼리 생성 실패: " + geoEx.getMessage());
-                    geoEx.printStackTrace();
-                    // 위치 쿼리 실패 시에도 다른 검색 조건으로 계속 진행
-                    System.out.println("위치 쿼리를 제외하고 검색을 계속 진행합니다.");
-                }
-            } else {
-                System.out.println("위치 필터 없음");
-            }
-
-            System.out.println("6. Bool 쿼리 빌드 중...");
-            System.out.println("Must 쿼리 개수: " + mustQueries.size());
-            System.out.println("Should 쿼리 개수: " + shouldQueries.size());
-
-            BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder()
-                .must(mustQueries); // 필수 조건 추가
-
-            if (hasKeyword) {
-                boolQueryBuilder.should(shouldQueries);
-                boolQueryBuilder.minimumShouldMatch("1");
-                System.out.println("Should 쿼리와 minimumShouldMatch 설정 완료");
-            }
-
-            Query boolQuery = boolQueryBuilder.build()._toQuery();
-            System.out.println("Bool 쿼리 빌드 완료");
-
-            System.out.println("7. 정렬 옵션 설정 중...");
-            // 수정된 정렬: unmapped_type 옵션 추가
-            List<SortOptions> sortOptions = List.of(
-                SortOptions.of(s -> s.field(f -> f
-                    .field("date")
-                    .order(SortOrder.Desc)
-                    .unmappedType(FieldType.Date)
-                )),
-                SortOptions.of(s -> s.field(f -> f
-                    .field("id")
-                    .order(SortOrder.Desc)
-                    .unmappedType(FieldType.Long)
-                ))
+            // Edge NGram 기반
+            MatchQuery ngramQuery = MatchQuery.of(m -> m
+                .field("name.ngram")
+                .query(keyword)
             );
+            shouldQueries.add(ngramQuery._toQuery());
 
-            System.out.println("8. NativeQuery 빌드 중...");
+            // 접두사 기반 검색
+            MatchPhrasePrefixQuery phrasePrefix = MatchPhrasePrefixQuery.of(m -> m
+                .field("name.nori")
+                .query(keyword)
+            );
+            shouldQueries.add(phrasePrefix._toQuery());
 
-            // 페이지 크기 설정
-            int pageSize = (size != null && size > 0) ? size : 1000; // 기본값 1000
-            System.out.println("페이지 크기 설정: " + pageSize);
-
-            NativeQuery searchQuery = NativeQuery.builder()
-                .withQuery(boolQuery)
-                .withSort(sortOptions)
-                .withPageable(PageRequest.of(0, pageSize))
-                .build();
-            System.out.println("NativeQuery 빌드 완료");
-
-            // 디버깅을 위한 쿼리 출력
-            System.out.println("생성된 쿼리 정보:");
-            System.out.println("Query toString: " + boolQuery.toString());
-            System.out.println("Page size: " + pageSize);
-
-            System.out.println("9. Elasticsearch 검색 실행 중...");
-            SearchHits<LostItemDocument> result = elasticsearchOperations.search(searchQuery, LostItemDocument.class);
-
-            System.out.println("========== 검색 성공! ==========");
-            System.out.println("총 결과 수: " + result.getTotalHits());
-            System.out.println("반환된 문서 수: " + result.getSearchHits().size());
-            System.out.println("================================");
-
-            return result;
-
-        } catch (Exception e) {
-            System.out.println("========== 검색 실패! ==========");
-            System.out.println("오류 타입: " + e.getClass().getSimpleName());
-            System.out.println("오류 메시지: " + e.getMessage());
-            System.out.println("스택 트레이스:");
-            e.printStackTrace();
-            System.out.println("===============================");
-            throw e;
+            // Fuzzy 철자 오류 보정
+            FuzzyQuery fuzzyQuery = FuzzyQuery.of(f -> f
+                .field("name")
+                .value(keyword)
+                .fuzziness("AUTO")
+            );
+            shouldQueries.add(fuzzyQuery._toQuery());
         }
+
+        TermQuery termQuery = TermQuery.of(t -> t
+            .field("categoryId")
+            .value(categoryId)
+        );
+        mustQueries.add(termQuery._toQuery());
+
+        MatchQuery regionQuery = MatchQuery.of(m -> m
+            .field("region")
+            .query(region)
+        );
+        mustQueries.add(regionQuery._toQuery());
+
+        GeoBoundingBoxQuery geoQuery = GeoBoundingBoxQuery.of(g -> g
+            .field("location")
+            .boundingBox(b -> b
+                .tlbr(tlbr -> tlbr
+                    .topLeft(tl -> tl.latlon(ll -> ll
+                        .lat(topLeftLat)
+                        .lon(topLeftLon)
+                    ))
+                    .bottomRight(br -> br.latlon(ll -> ll
+                        .lat(bottomRightLat)
+                        .lon(bottomRightLon)
+                    ))
+                )
+            )
+        );
+
+        mustQueries.add(geoQuery._toQuery());
+
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder()
+            .must(mustQueries);
+
+        if (hasKeyword) {
+            boolQueryBuilder.should(shouldQueries);
+            boolQueryBuilder.minimumShouldMatch("1");
+        }
+
+        Query boolQuery = boolQueryBuilder.build()._toQuery();
+
+        List<SortOptions> sortOptions = List.of(
+            SortOptions.of(s -> s.field(f -> f
+                .field("date")
+                .order(SortOrder.Desc)
+                .unmappedType(FieldType.Date)
+            )),
+            SortOptions.of(s -> s.field(f -> f
+                .field("id")
+                .order(SortOrder.Desc)
+                .unmappedType(FieldType.Long)
+            ))
+        );
+
+        int pageSize = (size != null && size > 0) ? size : 1000;
+
+        NativeQuery searchQuery = NativeQuery.builder()
+            .withQuery(boolQuery)
+            .withSort(sortOptions)
+            .withPageable(PageRequest.of(0, pageSize))
+            .build();
+
+        SearchHits<LostItemDocument> result = elasticsearchOperations.search(searchQuery, LostItemDocument.class);
+
+        return result;
     }
 
     @Transactional(readOnly = true)
