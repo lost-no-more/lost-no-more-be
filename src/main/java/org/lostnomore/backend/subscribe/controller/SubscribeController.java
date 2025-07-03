@@ -29,7 +29,6 @@ public class SubscribeController {
     public ResponseEntity<ResponseDto<RecentItemsDto>> getRecentItems (
             @LoginUser final Long userId
     ) {
-        log.info("check1");
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(subscribeService.getRecentItems(userId)));
     }
 

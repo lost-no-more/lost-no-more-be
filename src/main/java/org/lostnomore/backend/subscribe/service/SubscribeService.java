@@ -57,9 +57,7 @@ public class SubscribeService {
         LocalDate dateEnd = LocalDate.now().minusDays(1);
         LocalDate dateStart = dateEnd.minusDays(7);
 
-        log.info("check2");
         List<Subscribe> subscribes = subscribeRetriever.findByUserId(userId);
-        log.info("check3");
         Set<Long> lostItemIds = searchLostItemIds(subscribes, dateStart, dateEnd, 9);
 
         if (lostItemIds.isEmpty()) {
