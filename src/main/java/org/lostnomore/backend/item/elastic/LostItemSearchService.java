@@ -10,8 +10,10 @@ import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -30,6 +32,9 @@ public class LostItemSearchService {
     private final ElasticsearchOperations elasticsearchOperations;
     private final NoriAnalyzerService noriAnalyzerService;
 
+    @Value("${spring.elasticsearch.uris:NOT_SET}")
+    private String elasticsearchUris;
+
     @Transactional(readOnly = true)
     public SearchHits<LostItemDocument> searchLostItems(
         LocalDate dateStart,
@@ -45,6 +50,22 @@ public class LostItemSearchService {
     ) {
         List<Query> mustQueries = new ArrayList<>();
         List<Query> shouldQueries = new ArrayList<>();
+
+        // === Elasticsearch 연결 정보 확인 ===
+        log.info("=== Elasticsearch 연결 정보 디버깅 ===");
+        log.info("설정된 Elasticsearch URI: {}", elasticsearchUris);
+        log.info("SPRING_ELASTICSEARCH_URIS 환경변수: {}", System.getenv("SPRING_ELASTICSEARCH_URIS"));
+        log.info("ElasticsearchOperations 클래스: {}", elasticsearchOperations.getClass().getName());
+
+        // ElasticsearchTemplate 정보 출력
+        if (elasticsearchOperations instanceof ElasticsearchTemplate) {
+            ElasticsearchTemplate template = (ElasticsearchTemplate) elasticsearchOperations;
+            log.info("ElasticsearchTemplate 정보: {}", template.toString());
+        }
+
+        // 시스템 프로퍼티 확인
+        log.info("spring.elasticsearch.uris 시스템 프로퍼티: {}", System.getProperty("spring.elasticsearch.uris"));
+        log.info("현재 활성 프로파일: {}", System.getProperty("spring.profiles.active"));
 
         log.info("=== 검색 파라미터 ===");
         log.info("categoryId: {}", categoryId);
@@ -225,8 +246,8 @@ public class LostItemSearchService {
 
     @Transactional(readOnly = true)
     public SearchHits<LostItemDocument> searchLostItemsForSubscription(
-            LocalDate dateStart, LocalDate dateEnd,
-            String keyword, Long categoryId, String region, Integer size) {
+        LocalDate dateStart, LocalDate dateEnd,
+        String keyword, Long categoryId, String region, Integer size) {
         return searchLostItems(dateStart, dateEnd, null, null, null, null, keyword, categoryId, region, size);
     }
 }
