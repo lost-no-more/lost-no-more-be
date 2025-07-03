@@ -8,6 +8,8 @@ import co.elastic.clients.elasticsearch._types.mapping.FieldType;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
@@ -20,6 +22,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LostItemSearchService {
@@ -42,6 +45,7 @@ public class LostItemSearchService {
     ) {
         List<Query> mustQueries = new ArrayList<>();
         List<Query> shouldQueries = new ArrayList<>();
+        log.info("categoryId: {}", categoryId);
 
         // 날짜 범위
         RangeQuery dateRangeQuery = new RangeQuery.Builder()
