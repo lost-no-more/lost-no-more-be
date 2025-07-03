@@ -12,3 +12,9 @@ spring:
     time-zone: Asia/Seoul
 server:
   timezone: Asia/Seoul
+
+logging:
+  level:
+    org.springframework.data.elasticsearch: DEBUG
+    org.lostnomore.backend.item.elastic: DEBUG
+    tracer: TRACE
