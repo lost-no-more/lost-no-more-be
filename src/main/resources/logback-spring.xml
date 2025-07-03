@@ -3,6 +3,7 @@
     <property name="LOG_PATTERN"
               value="[%d{yyyy-MM-dd'T'HH:mm:ss}:%-4relative] %green([%thread]) %highlight(%-5level) %boldWhite([%C.%M:%yellow(%L)]) - %msg%n"/>
     <springProperty name="DISCORD_WEBHOOK_URI" source="logging.discord.webhook-url"/>
+
     <springProfile name="local">
         <include resource="console-appender.xml"/>
         <root level="INFO">
@@ -10,7 +11,21 @@
         </root>
     </springProfile>
 
-    <springProfile name="!local">
+    <springProfile name="dev">
+        <include resource="console-appender.xml"/>
+        <include resource="file-info-appender.xml"/>
+        <include resource="file-error-appender.xml"/>
+        <include resource="discord-appender.xml"/>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>        <!-- 콘솔 출력 추가 -->
+            <appender-ref ref="FILE-INFO"/>
+            <appender-ref ref="FILE-ERROR"/>
+            <appender-ref ref="ASYNC_DISCORD"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
         <include resource="file-info-appender.xml"/>
         <include resource="file-error-appender.xml"/>
         <include resource="discord-appender.xml"/>
@@ -21,5 +36,4 @@
             <appender-ref ref="ASYNC_DISCORD"/>
         </root>
     </springProfile>
-
 </configuration>
