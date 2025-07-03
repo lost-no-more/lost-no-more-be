@@ -105,11 +105,13 @@ public class LostItemSearchService {
         );
         mustQueries.add(termQuery._toQuery());
 
-        MatchQuery regionQuery = MatchQuery.of(m -> m
-            .field("region")
-            .query(region)
-        );
-        mustQueries.add(regionQuery._toQuery());
+        if (region != null && !region.isBlank()) {
+            MatchQuery regionQuery = MatchQuery.of(m -> m
+                .field("region")
+                .query(region)
+            );
+            mustQueries.add(regionQuery._toQuery());
+        }
 
         GeoBoundingBoxQuery geoQuery = GeoBoundingBoxQuery.of(g -> g
             .field("location")
