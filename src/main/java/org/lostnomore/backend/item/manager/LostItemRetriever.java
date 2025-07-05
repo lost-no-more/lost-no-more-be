@@ -1,20 +1,17 @@
 package org.lostnomore.backend.item.manager;
 
-import jakarta.persistence.Tuple;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.lostnomore.backend.global.exception.BusinessException;
 import org.lostnomore.backend.global.exception.code.ItemErrorCode;
 import org.lostnomore.backend.item.domain.LostItem;
-import org.lostnomore.backend.item.dto.request.LostItemIdsDto;
 import org.lostnomore.backend.item.repository.LostItemRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.Tuple;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
