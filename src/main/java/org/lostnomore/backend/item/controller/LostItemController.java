@@ -35,14 +35,6 @@ public class LostItemController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success(lostItemService.getItemsCount()));
     }
 
-    @PostMapping("/items")
-    public ResponseEntity<ResponseDto<Void>> saveLostItem(
-            @RequestBody final LostItemCreateDto request
-    ) {
-        lostItemService.saveLostItem(request);
-        return ResponseEntity.ok(ResponseDto.success());
-    }
-
     @GetMapping("/items/search/map")
     public ResponseEntity<ResponseDto<LostItemsSearchDto>> searchLostItems(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date_start,
