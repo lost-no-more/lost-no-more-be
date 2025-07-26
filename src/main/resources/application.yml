@@ -17,4 +17,3 @@ logging:
   level:
     org.springframework.data.elasticsearch: DEBUG
     org.lostnomore.backend.item.elastic: DEBUG
-    tracer: TRACE
